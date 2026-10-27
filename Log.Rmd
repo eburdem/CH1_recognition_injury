@@ -32,7 +32,6 @@ means different things depending on which hypothesis is being reported
 (27-country/3-wave for descriptives and H2 alone if split out later;
 27-country/2-wave for H1/H3 as specified).
 
-
 ## [2026-10-26] Rebuild from scratch: recodes verified against codebook labels
 **Context:** Rebuilding the pipeline in a new repo (`CH1_recognition_injury`) with minimal packages.
 **Decision:** Every recode (`sss`, `credential`, `ind_belief`, `income`, `gender`, `age`) was checked
@@ -56,4 +55,12 @@ model with 2019 only. Planned sensitivity check: refit without `tertiary` as a c
 ## [2026-10-27] Respondents aged 15–17 kept
 **Decision:** Only `AGE = -9` set to `NA`. 455 respondents aged 15–17 and one aged 105 are
 retained. Restricting to 18+ is a possible sensitivity check.
+
+merged %>%
+  filter(wave %in% c(2009, 2019), !is.na(stratification)) %>%
+  group_by(country, wave) %>%
+  summarise(tert_missing = all(is.na(tertiary)), .groups = "drop") %>%
+  filter(tert_missing)
+  
+
 
