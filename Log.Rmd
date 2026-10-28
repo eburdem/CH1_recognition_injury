@@ -302,5 +302,15 @@ Republic, Great Britain, Italy, Lithuania and Slovenia. Mean +14.7. Single-wave 
 (-0.47) is partly a coding artifact (Australia, NZ, USA are 2019-only).
 **Decision:** Open. 
 
+## [2026-10-28] Supervisor reply: harmonize education across waves
+**Anthony:** unbalanced country-wave structure must be accounted for in the nesting and limits the
+conclusions, but is not particularly problematic. Recommends making the education variable as
+similar as possible across waves: recode from the national degree variables (may need the
+separate wave files) or consider EDUCYRS (possibly non-linear; ideally with published precedent).
+**Check:** the cumulation DEGREE boundary between 4 and 5 differs by country and wave (2019 cat 5
+= first-stage tertiary, cat 6 = Master/Doctor; 2009 boundary varies). EDUCYRS has outlier codes
+and needs cleaning; where clean it is stable across waves while DEGREE = 5 jumps 20–28 points.
+Israel's jump is not explained by coding.
+**Decision (pending):** build a country-by-wave crosswalk from national degree variables.
 
 
