@@ -313,4 +313,27 @@ and needs cleaning; where clean it is stable across waves while DEGREE = 5 jumps
 Israel's jump is not explained by coding.
 **Decision (pending):** build a country-by-wave crosswalk from national degree variables.
 
+## 2026-10-28 Harmonizing the tertiary credential across ISSP 2009 and 2019
+
+**Context**
+The DEGREE variable changes meaning between waves: 2009 categories are derived
+from national degree variables, and 2019 follows ISCED-97. DEGREE = 5 therefore 
+means different things in the two waves, and the tertiary share jumped for 
+countries observed in both (for example Italy 4% to 25%). Anthony advised 
+recoding from the national-level degree variables (XX_DEGR).
+
+**What went wrong**
+Using DEGREE = 5 as the credential made the change in credential prevalence 
+between waves partly a coding artifact. This was confounded with country because 
+10 countries appear in only one wave.
+
+**Decision**
+I built a country-by-wave crosswalk (data/codebooks/degree_crosswalk.csv, 504 rows) 
+from the national degree categories and coded harmonized_tertiary by label, not by DEGREE.
+Rule: 1 = completed degree at bachelor level or higher (bachelor, master, doctorate, long university degrees, and bachelor-level degrees from universities of applied sciences or polytechnics, about three or more years). 0 = everything else, including incomplete university, short-cycle or technical tertiary under 3 years, higher vocational, Meister and apprenticeships, post-secondary non-tertiary, and school levels.
+Ambiguous categories were decided by the rule, with median years of education as a tie-breaker only. 
+Kept as 0 and flagged: Chile non-university higher education and Swiss higher vocational training (ISCED 6 in some classifications). Kept as 1 and flagged: Swiss "Uni diploma (intermediary level)" and "Bachelor + short degree", and Swedish 2009 "University degree" (may include short degrees).
+
+**Result**
+The crosswalk is complete with no duplicate keys. 
 
