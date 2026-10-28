@@ -154,5 +154,10 @@ d3 %>% distinct(country, wave, stratification, gini, gdp_pc, tertiary) %>%
   arrange(country, wave) %>% print(n = 50)
 
 
+d2 %>% drop_na(all_of(c(setdiff(model_vars, "credential"), "credential_alt"))) %>% nrow()
+
+d3 %>% group_by(country) %>%
+  summarise(pct_tert = 100 * mean(credential), pct_alt = 100 * mean(credential_alt)) %>%
+  arrange(desc(pct_alt - pct_tert)) %>% print(n = 30)
 
 
