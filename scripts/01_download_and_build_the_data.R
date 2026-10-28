@@ -24,6 +24,7 @@ issp <- issp_raw %>%
     wave       = year,
     sss        = if_else(topbot %in% 1:10, topbot, NA_real_),
     credential = case_when(degree == 5 ~ 1, degree %in% 0:4 ~ 0),   # tertiary = degree 5 only
+    credential_alt = case_when(degree >= 4 ~ 1, degree %in% 0:3 ~ 0),   # post-secondary or higher
     ind_belief = if_else(v6 %in% 1:5, 6 - v6, NA_real_),            # 5 = strongest endorsement
     income     = factor(if_else(income %in% 1:3, income, NA_real_)),
     age        = if_else(age > 0, age, NA_real_),
