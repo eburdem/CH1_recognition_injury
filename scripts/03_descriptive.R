@@ -127,6 +127,32 @@ p_isei <- ggplot(d3, aes(x = isei)) +
 p_isei
 ggsave("output/figures/hist_isei.png", p_isei, width = 6, height = 4, dpi = 300)
 
+#' Group Descriptives
+
+#' Raw credential gap
+d3 %>% group_by(credential) %>%
+  summarise(mean_sss = mean(sss), n = n())
+
+#' Credential x belief (do the lines fan out?)
+d3 %>% group_by(credential, ind_belief) %>%
+  summarise(mean_sss = mean(sss), n = n(), .groups = "drop")
+
+#' Correlations among main variables
+cor(d3[c("sss", "credential", "ind_belief", "isei", "age")])
+
+d3 %>%
+  group_by(country) %>%
+  summarise(n = n(),
+            mean_sss = mean(sss),
+            pct_tertiary = 100 * mean(credential),
+            stratification = first(stratification)) %>%
+  arrange(desc(stratification)) %>%
+  print(n = 30)
+
+# country-level variables by wave (stratification is constant; the others vary)
+d3 %>% distinct(country, wave, stratification, gini, gdp_pc, tertiary) %>%
+  arrange(country, wave) %>% print(n = 50)
+
 
 
 
