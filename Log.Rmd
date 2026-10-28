@@ -3,11 +3,8 @@ title: "Log"
 output: github_document
 ---
 
-
 ## [2026-09-03] Individual Meritocratic Belief: hard-work item missing from 1999 — H1/H3 restricted to 2009/2019
-**Context:**  Extracted the actual ZA8790 "Variable Report" codebook
-(`data/codebooks/ISSP/cumulation/ZA8790_cdb.pdf`) directly. 
-**What went wrong:** the Methodology Outline state the hard-work item (MAIN Individual Meritocratic Belief measure) is "available and coded consistently in all three waves" (1999/2009/2019).
+**Context:** The Methodology Outline state the hard-work item (MAIN Individual Meritocratic Belief measure) is "available and coded consistently in all three waves" (1999/2009/2019).
 The codebook shows this is false: the item (`v6` in the cumulation) is
 explicitly marked "Variable not available in this module" for ISSP 1999 —
 it only exists in 1987, 1992, 2009, and 2019. Cross-checked directly against
@@ -18,49 +15,92 @@ robustness measure's second component): available only in 1987/1992/2009 —
 missing from BOTH 1999 and 2019, not just 2019 as previously assumed.
 **Decision:** H1 and H3 (both use `ind_belief_c` as a moderator) are
 restricted to the 2009 and 2019 waves only. 1999 is dropped from these two
-models explicitly, not left in and relying on implicit listwise deletion — the sample restriction should be stated plainly in the methods/results write-up, not
-buried. The two-item robustness check (hard work + ambition) is now a single-wave (2009-only) check, not a 1999/2009 comparison — `wave` was dropped from that model's formula since it would otherwise be a constant with no variation.
-H2 alone (credential × stratification, no belief term) doesn't strictly need
-this restriction, but the current script tests H1/H2/H3 jointly in one
-three-way-interaction model, so the restriction applies to the whole main
-model as specified. Splitting H2 out into its own three-wave model is a
-possible follow-up but wasn't decided here.
+models explicitly, not left in and relying on implicit listwise deletion — the 
+sample restriction should be stated plainly in the methods/results write-up, not
+buried. The two-item robustness check (hard work + ambition) is now a 
+single-wave (2009-only) check, not a 1999/2009 comparison — `wave` was dropped 
+from that model's formula since it would otherwise be a constant with no 
+variation.
 **Why this matters:** this shrinks the effective sample for the chapter's
 two central, novel hypotheses (H1, H3) by a full wave and needs a
-limitations-section footnote.  It also means "the Chapter 1 sample" now
-means different things depending on which hypothesis is being reported
-(27-country/3-wave for descriptives and H2 alone if split out later;
-27-country/2-wave for H1/H3 as specified).
+limitations-section footnote.
 
-## [2026-10-26] Rebuild from scratch: recodes verified against codebook labels
-**Context:** Rebuilding the pipeline in a new repo (`CH1_recognition_injury`) with minimal packages.
-**Decision:** Every recode (`sss`, `credential`, `ind_belief`, `income`, `gender`, `age`) was checked
-against the value labels and with old-vs-new cross-tabs before use. Negative codes (-9/-8/-7/-3/-1) → `NA`.
-`ind_belief` = 6 − `v6` (5 = strongest hard-work endorsement). Stratification direction checked
+## [2026-10-26] Building from scratch: recodes verified against codebook labels
+**Context:** Building the pipeline in a new repo (`CH1_recognition_injury`).
+**Decision:** Every code (`sss`, `credential`, `ind_belief`, `income`, `gender`, 
+`age`) was checked against the value labels and with old-vs-new cross-tabs 
+before use. Negative codes (-9/-8/-7/-3/-1) → `NA`. `ind_belief` = 6 − `v6` (5 = 
+strongest hard-work endorsement). Stratification direction checked
 (Austria/Germany/Hungary = 8; Australia/Canada/NZ/USA = 0).
 
 ## [2026-10-27] ISEI missing for ~19.5% of respondents
-**What I found:** Almost all are ISCO-88 missing codes (mainly -4: respondents with no job),
-not lookup gaps; code 110 (armed forces, 482 cases) is the only real unmatched code.
-**Decision:** Left as `NA`. Non-working respondents drop out of any model with occupational status;
-this goes in the attrition table.
+**What I found:** Almost all are ISCO-88 missing codes (mainly -4: respondents 
+with no job), not lookup gaps; code 110 (armed forces, 482 cases) is the only 
+real unmatched code.
+**Decision:** Left as `NA`. Non-working respondents drop out of any model with 
+occupational status; this goes in the attrition table.
 
 ## [2026-10-27] Tertiary enrolment (WDI) missing for six sample country-waves
-**What I found:** Australia, Germany, Japan, New Zealand, Portugal and the USA have no
-`SE.TER.ENRR` value for 2006–2012 in the download, so none for the 2009 wave. This is why
-the old main model had 25 countries (Portugal drops out entirely; Canada has only 1999).
-**Decision:** Baseline keeps `tertiary` as `NA` (no interpolation). Five countries enter the main
-model with 2019 only. Planned sensitivity check: refit without `tertiary` as a control.
+**What I found:** Australia, Germany, Japan, New Zealand, Portugal and the USA 
+have no `SE.TER.ENRR` value for 2006–2012 in the download, so none for the 2009 
+wave. This is why the old main model had 25 countries (Portugal drops out 
+entirely; Canada has only 1999).
+**Decision:** Baseline keeps `tertiary` as `NA` (no interpolation). Five 
+countries enter the main model with 2019 only. Planned sensitivity check: refit 
+without `tertiary` as a control.
 
 ## [2026-10-27] Respondents aged 15–17 kept
-**Decision:** Only `AGE = -9` set to `NA`. 455 respondents aged 15–17 and one aged 105 are
-retained. Restricting to 18+ is a possible sensitivity check.
-
-merged %>%
-  filter(wave %in% c(2009, 2019), !is.na(stratification)) %>%
-  group_by(country, wave) %>%
-  summarise(tert_missing = all(is.na(tertiary)), .groups = "drop") %>%
-  filter(tert_missing)
+**Decision:** Only `AGE = -9` set to `NA`. 455 respondents aged 15–17 and one 
+aged 105 are retained. Restricting to 18+ is a possible sensitivity check.
   
+## [2026-10-27] Analytic sample 
+**Decision:** Sample built by sequential filters, recording n and countries after each step:
+118,200 (35 countries) → waves 2009 + 2019: 87,019 (34) → has a stratification 
+value: 60,945 (26) → complete on all model variables: 38,010 (25). 
+Same as the old pipeline (25 countries,n = 38,010). `drop_na()` names the model 
+variables explicitly. Canada leaves at the wave step (1999 only); the 8 
+countries without OECD coverage leave at the stratification step; Portugal
+leaves at the complete-case step (no 2019 wave, tertiary missing in 2009).
+
+## [2026-10-27] Missingness is patterned by country and not by wave
+**Result (26-country sample, before complete cases):** income missing 17.8% 
+(largest loss), 7% (Norway) to 43% (Portugal); ISEI 12.7% (Spain 32%, Japan 31%); 
+tertiary 12.7%. By wave: income 17.8% vs 17.9%; ISEI 14.6% (2009) vs 10.6% (2019). 
+Income missingness is respondent non-response (-9/-8/-7), not an unasked item 
+(no -1 codes in the high-missing countries). Individually lost respondents: 
+income 10,857; ISEI 7,768; tertiary 7,732; sss 1,202; ind_belief 906; 
+credential 672; age 408; gender 126 (overlap explains why they sum to more than 
+the 22,935 lost).
+
+## [2026-10-27] Retention by country is uneven
+**Result:** complete-case retention ranges from 0% (Portugal) to 84% (Sweden). 
+Australia keeps 658 respondents, Spain 486, Switzerland 3,077. Australia, 
+Germany, Japan, USA and New Zealand contribute 2019 only (tertiary gap). The low 
+end of stratification (Australia, NZ, USA) is hit hardest.
+
+## [2026-10-27] Sensitivity sample without tertiary
+**Result:** dropping `tertiary` from the complete-case rule gives n = 43,211 in 
+26 countries (Portugal returns; five countries regain their 2009 wave). Planned 
+as a robustness run.
+
+## [2026-10-27] The analytic sample is selected
+**Result:** sample at each step (2009/2019 data → 26 countries → complete cases): 
+mean SSS 5.20 → 5.41 → 5.46; tertiary share 25.6% → 27.3% → 30.7%; 
+mean age 48.4 → 50.2 → 50.9. The SSS rise comes from the country filter 
+(the 8 dropped countries average SSS 4.70); the tertiary rise comes from the 
+complete-case step.
+
+## [2026-10-27] Univariate descriptives (n = 38,010)
+**Result:** SSS mean 5.46, SD 1.72, range 1–10, roughly bell-shaped (histogram, binwidth 1).
+Belief (1–5): mean 3.89, SD 0.90, median 4, upper quartile at the maximum (ceiling); 
++1 SD is about 0.9 of a scale point. ISEI mean 46.4 (SD 17.5, 16–90); 
+age mean 50.9 (SD 16.3, 15–99). 30.7% tertiary; income terciles 32/33/35%; 
+52.7% female; 45% 2009, 55% 2019.
+
+**Plots:** SSS roughly bell-shaped; income terciles nearly even (top tercile slightly
+over-represented); belief strongly left-skewed with mode at 4 (about 70% in categories 4–5,
+only about 6% in 1–2); ISEI multimodal (clusters near 30, 50 and 70) because it takes
+discrete values by occupation group. Limitation noted: few low-belief respondents.
+
 
 
