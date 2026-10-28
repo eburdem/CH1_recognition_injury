@@ -70,3 +70,12 @@ country_level %>%
          wave %in% 2006:2012) %>%
   arrange(country, wave) %>%
   print(n = 50)
+
+#' Tertiary cut
+tmp <- data.frame(country = merged$country, wave = merged$wave,
+                  degree = as.numeric(issp_raw$degree))   # needs issp_raw loaded
+tmp %>%
+  filter(wave %in% c(2009, 2019), country %in% unique(d3$country)) %>%
+  group_by(country) %>%
+  summarise(pct_4 = 100 * mean(degree == 4), pct_5 = 100 * mean(degree == 5)) %>%
+  arrange(desc(pct_4)) %>% print(n = 30)
