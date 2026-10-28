@@ -102,5 +102,205 @@ over-represented); belief strongly left-skewed with mode at 4 (about 70% in cate
 only about 6% in 1–2); ISEI multimodal (clusters near 30, 50 and 70) because it takes
 discrete values by occupation group. Limitation noted: few low-belief respondents.
 
+## [2026-10-28] Pipeline cleanup: sample and descriptives in one script, outputs organized
+**Decision:** `03_descriptive.R` builds the analytic sample (all rows → waves 2009 + 2019 →
+stratification present → complete on `model_vars`, defined once) and runs the descriptives.
+
+## [2026-10-28] Distribution plots
+**Result:** SSS roughly bell-shaped (peak at 5–6). Income terciles nearly even. Belief strongly
+left-skewed: mode at 4, about 70% in categories 4–5, about 6% in 1–2 (few low-belief
+respondents). ISEI multimodal (clusters near 30, 50, 70) because it takes discrete values by
+occupation group.
+
+## [2026-10-28] Group descriptives
+**Result:** Raw credential gap = 1.14 SSS points (6.25 vs 5.11). Gap by belief level (1–5):
+1.04, 0.88, 1.10, 1.14, 1.16; no clear fan-out in the raw means; both groups flatten between
+belief 4 and 5; the tertiary belief-1 cell has only 96 respondents. Correlations: credential–ISEI
+0.51 (largest), SSS–credential 0.30, SSS–ISEI 0.35, SSS–belief 0.07, belief–credential 0.04.
+**Decision:** 1.14 is the benchmark for the model's credential coefficient. Check
+credential–ISEI collinearity in the diagnostics.
+
+## [2026-10-28] Country-level descriptives
+**Result:** 25 countries, 40 country-waves: 15 with both waves, 5 with 2009 only, 5 with 2019
+only. Stratification has 7 distinct values; Italy (4), Switzerland (6) and the Czech Republic (7)
+are alone at their value. Country mean SSS 3.96 (Hungary) to 6.46 (New Zealand); tertiary
+share 5% to 58%. Country-level correlations: stratification–tertiary share −0.47,
+tertiary share–mean SSS +0.77. WDI tertiary enrolment is a gross ratio (110 in Australia 2019).
+
+## [2026-10-28] Tertiary cut (DEGREE = 5) is not equally clean across countries
+**Result:** DEGREE category 4 is 20–34% of respondents in Switzerland, Denmark, Australia,
+Lithuania, Germany, Finland, New Zealand and Japan, about as large as category 5 in several.
+Hungary: 18.0% in category 4 vs 4.75% in category 5 (its 5% tertiary share is probably a
+coding artifact). Small in the Czech Republic, Slovakia, Austria and Sweden.
+**Decision:** Keep DEGREE = 5 as the main measure.
+
+## [2026-10-28] `credential_alt` built (DEGREE >= 4) for robustness
+**Result:** Categories 0–3 → 0 (74,353), 4–5 → 1 (42,609), -9 → NA (1,238), the same missing
+values as the main `credential`, so the analytic sample is unchanged (n = 38,010, 25 countries).
+**Decision:** Main model keeps `credential` (DEGREE = 5); `credential_alt` is used only in the
+robustness run.
+
+
+## [2026-10-28] Credential share by country and wave
+**Result:** Among the 15 two-wave countries, tertiary share (DEGREE = 5) rises 2009 → 2019 by
++52 (Denmark), +28 (France), +25 (Switzerland), +23 (Sweden), +22 (Norway), +21 (Israel),
++20 (Iceland) and +15 (Finland) points; it is stable (|change| < 7) in Austria, Chile, Czech
+Republic, Great Britain, Italy, Lithuania and Slovenia. Mean +14.7. Single-wave countries:
+2009-only share 5–20% (Hungary, Slovakia, Poland, Spain, Latvia); 2019-only 26–58%
+(Japan, Germany, USA, NZ, Australia). The country-level stratification–tertiary correlation
+(-0.47) is partly a coding artifact (Australia, NZ, USA are 2019-only).
+**Decision:** ---
+title: "Log"
+output: github_document
+---
+
+## [2026-09-03] Individual Meritocratic Belief: hard-work item missing from 1999 — H1/H3 restricted to 2009/2019
+**Context:** The Methodology Outline state the hard-work item (MAIN Individual Meritocratic Belief measure) is "available and coded consistently in all three waves" (1999/2009/2019).
+The codebook shows this is false: the item (`v6` in the cumulation) is
+explicitly marked "Variable not available in this module" for ISSP 1999 —
+it only exists in 1987, 1992, 2009, and 2019. Cross-checked directly against
+the 1999 questionnaire PDF (`ZA3430_bq.pdf`): the 1999 "getting ahead"
+battery asked about wealthy family and knowing the right people only, not
+hard work. Same problem, worse, for the ambition item (`v4`, the two-item
+robustness measure's second component): available only in 1987/1992/2009 —
+missing from BOTH 1999 and 2019, not just 2019 as previously assumed.
+**Decision:** H1 and H3 (both use `ind_belief_c` as a moderator) are
+restricted to the 2009 and 2019 waves only. 1999 is dropped from these two
+models explicitly, not left in and relying on implicit listwise deletion — the 
+sample restriction should be stated plainly in the methods/results write-up, not
+buried. The two-item robustness check (hard work + ambition) is now a 
+single-wave (2009-only) check, not a 1999/2009 comparison — `wave` was dropped 
+from that model's formula since it would otherwise be a constant with no 
+variation.
+**Why this matters:** this shrinks the effective sample for the chapter's
+two central, novel hypotheses (H1, H3) by a full wave and needs a
+limitations-section footnote.
+
+## [2026-10-26] Building from scratch: recodes verified against codebook labels
+**Context:** Building the pipeline in a new repo (`CH1_recognition_injury`).
+**Decision:** Every code (`sss`, `credential`, `ind_belief`, `income`, `gender`, 
+`age`) was checked against the value labels and with old-vs-new cross-tabs 
+before use. Negative codes (-9/-8/-7/-3/-1) → `NA`. `ind_belief` = 6 − `v6` (5 = 
+strongest hard-work endorsement). Stratification direction checked
+(Austria/Germany/Hungary = 8; Australia/Canada/NZ/USA = 0).
+
+## [2026-10-27] ISEI missing for ~19.5% of respondents
+**What I found:** Almost all are ISCO-88 missing codes (mainly -4: respondents 
+with no job), not lookup gaps; code 110 (armed forces, 482 cases) is the only 
+real unmatched code.
+**Decision:** Left as `NA`. Non-working respondents drop out of any model with 
+occupational status; this goes in the attrition table.
+
+## [2026-10-27] Tertiary enrolment (WDI) missing for six sample country-waves
+**What I found:** Australia, Germany, Japan, New Zealand, Portugal and the USA 
+have no `SE.TER.ENRR` value for 2006–2012 in the download, so none for the 2009 
+wave. This is why the old main model had 25 countries (Portugal drops out 
+entirely; Canada has only 1999).
+**Decision:** Baseline keeps `tertiary` as `NA` (no interpolation). Five 
+countries enter the main model with 2019 only. Planned sensitivity check: refit 
+without `tertiary` as a control.
+
+## [2026-10-27] Respondents aged 15–17 kept
+**Decision:** Only `AGE = -9` set to `NA`. 455 respondents aged 15–17 and one 
+aged 105 are retained. Restricting to 18+ is a possible sensitivity check.
+  
+## [2026-10-27] Analytic sample 
+**Decision:** Sample built by sequential filters, recording n and countries after each step:
+118,200 (35 countries) → waves 2009 + 2019: 87,019 (34) → has a stratification 
+value: 60,945 (26) → complete on all model variables: 38,010 (25). 
+Same as the old pipeline (25 countries,n = 38,010). `drop_na()` names the model 
+variables explicitly. Canada leaves at the wave step (1999 only); the 8 
+countries without OECD coverage leave at the stratification step; Portugal
+leaves at the complete-case step (no 2019 wave, tertiary missing in 2009).
+
+## [2026-10-27] Missingness is patterned by country and not by wave
+**Result (26-country sample, before complete cases):** income missing 17.8% 
+(largest loss), 7% (Norway) to 43% (Portugal); ISEI 12.7% (Spain 32%, Japan 31%); 
+tertiary 12.7%. By wave: income 17.8% vs 17.9%; ISEI 14.6% (2009) vs 10.6% (2019). 
+Income missingness is respondent non-response (-9/-8/-7), not an unasked item 
+(no -1 codes in the high-missing countries). Individually lost respondents: 
+income 10,857; ISEI 7,768; tertiary 7,732; sss 1,202; ind_belief 906; 
+credential 672; age 408; gender 126 (overlap explains why they sum to more than 
+the 22,935 lost).
+
+## [2026-10-27] Retention by country is uneven
+**Result:** complete-case retention ranges from 0% (Portugal) to 84% (Sweden). 
+Australia keeps 658 respondents, Spain 486, Switzerland 3,077. Australia, 
+Germany, Japan, USA and New Zealand contribute 2019 only (tertiary gap). The low 
+end of stratification (Australia, NZ, USA) is hit hardest.
+
+## [2026-10-27] Sensitivity sample without tertiary
+**Result:** dropping `tertiary` from the complete-case rule gives n = 43,211 in 
+26 countries (Portugal returns; five countries regain their 2009 wave). Planned 
+as a robustness run.
+
+## [2026-10-27] The analytic sample is selected
+**Result:** sample at each step (2009/2019 data → 26 countries → complete cases): 
+mean SSS 5.20 → 5.41 → 5.46; tertiary share 25.6% → 27.3% → 30.7%; 
+mean age 48.4 → 50.2 → 50.9. The SSS rise comes from the country filter 
+(the 8 dropped countries average SSS 4.70); the tertiary rise comes from the 
+complete-case step.
+
+## [2026-10-27] Univariate descriptives (n = 38,010)
+**Result:** SSS mean 5.46, SD 1.72, range 1–10, roughly bell-shaped (histogram, binwidth 1).
+Belief (1–5): mean 3.89, SD 0.90, median 4, upper quartile at the maximum (ceiling); 
++1 SD is about 0.9 of a scale point. ISEI mean 46.4 (SD 17.5, 16–90); 
+age mean 50.9 (SD 16.3, 15–99). 30.7% tertiary; income terciles 32/33/35%; 
+52.7% female; 45% 2009, 55% 2019.
+
+**Plots:** SSS roughly bell-shaped; income terciles nearly even (top tercile slightly
+over-represented); belief strongly left-skewed with mode at 4 (about 70% in categories 4–5,
+only about 6% in 1–2); ISEI multimodal (clusters near 30, 50 and 70) because it takes
+discrete values by occupation group. Limitation noted: few low-belief respondents.
+
+## [2026-10-28] Pipeline cleanup: sample and descriptives in one script, outputs organized
+**Decision:** `03_descriptive.R` builds the analytic sample (all rows → waves 2009 + 2019 →
+stratification present → complete on `model_vars`, defined once) and runs the descriptives.
+
+## [2026-10-28] Distribution plots
+**Result:** SSS roughly bell-shaped (peak at 5–6). Income terciles nearly even. Belief strongly
+left-skewed: mode at 4, about 70% in categories 4–5, about 6% in 1–2 (few low-belief
+respondents). ISEI multimodal (clusters near 30, 50, 70) because it takes discrete values by
+occupation group.
+
+## [2026-10-28] Group descriptives
+**Result:** Raw credential gap = 1.14 SSS points (6.25 vs 5.11). Gap by belief level (1–5):
+1.04, 0.88, 1.10, 1.14, 1.16; no clear fan-out in the raw means; both groups flatten between
+belief 4 and 5; the tertiary belief-1 cell has only 96 respondents. Correlations: credential–ISEI
+0.51 (largest), SSS–credential 0.30, SSS–ISEI 0.35, SSS–belief 0.07, belief–credential 0.04.
+**Decision:** 1.14 is the benchmark for the model's credential coefficient. Check
+credential–ISEI collinearity in the diagnostics.
+
+## [2026-10-28] Country-level descriptives
+**Result:** 25 countries, 40 country-waves: 15 with both waves, 5 with 2009 only, 5 with 2019
+only. Stratification has 7 distinct values; Italy (4), Switzerland (6) and the Czech Republic (7)
+are alone at their value. Country mean SSS 3.96 (Hungary) to 6.46 (New Zealand); tertiary
+share 5% to 58%. Country-level correlations: stratification–tertiary share −0.47,
+tertiary share–mean SSS +0.77. WDI tertiary enrolment is a gross ratio (110 in Australia 2019).
+
+## [2026-10-28] Tertiary cut (DEGREE = 5) is not equally clean across countries
+**Result:** DEGREE category 4 is 20–34% of respondents in Switzerland, Denmark, Australia,
+Lithuania, Germany, Finland, New Zealand and Japan, about as large as category 5 in several.
+Hungary: 18.0% in category 4 vs 4.75% in category 5 (its 5% tertiary share is probably a
+coding artifact). Small in the Czech Republic, Slovakia, Austria and Sweden.
+**Decision:** Keep DEGREE = 5 as the main measure.
+
+## [2026-10-28] `credential_alt` built (DEGREE >= 4) for robustness
+**Result:** Categories 0–3 → 0 (74,353), 4–5 → 1 (42,609), -9 → NA (1,238), the same missing
+values as the main `credential`, so the analytic sample is unchanged (n = 38,010, 25 countries).
+**Decision:** Main model keeps `credential` (DEGREE = 5); `credential_alt` is used only in the
+robustness run.
+
+
+## [2026-10-28] Credential share by country and wave
+**Result:** Among the 15 two-wave countries, tertiary share (DEGREE = 5) rises 2009 → 2019 by
++52 (Denmark), +28 (France), +25 (Switzerland), +23 (Sweden), +22 (Norway), +21 (Israel),
++20 (Iceland) and +15 (Finland) points; it is stable (|change| < 7) in Austria, Chile, Czech
+Republic, Great Britain, Italy, Lithuania and Slovenia. Mean +14.7. Single-wave countries:
+2009-only share 5–20% (Hungary, Slovakia, Poland, Spain, Latvia); 2019-only 26–58%
+(Japan, Germany, USA, NZ, Australia). The country-level stratification–tertiary correlation
+(-0.47) is partly a coding artifact (Australia, NZ, USA are 2019-only).
+**Decision:** Open. 
+
 
 
