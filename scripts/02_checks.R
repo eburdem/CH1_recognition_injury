@@ -79,3 +79,8 @@ tmp %>%
   group_by(country) %>%
   summarise(pct_4 = 100 * mean(degree == 4), pct_5 = 100 * mean(degree == 5)) %>%
   arrange(desc(pct_4)) %>% print(n = 30)
+
+
+table(issp_raw$degree, merged$credential_alt, useNA = "ifany")
+
+
