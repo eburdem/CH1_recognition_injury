@@ -337,3 +337,15 @@ Kept as 0 and flagged: Chile non-university higher education and Swiss higher vo
 **Result**
 The crosswalk is complete with no duplicate keys. 
 
+
+## 2026-10-28 Harmonized tertiary credential from national degree variables
+**Context**
+DEGREE changes meaning between 2009 and 2019, and Anthony advised recoding from the national degree variables.
+**What went wrong**
+First join key (v2) was the data version string, not an ID; the iso code was built after country was overwritten inside transmute, giving 100% missing credential. My first check passed vacuously.
+**Decision**
+Built a country-by-wave crosswalk (504 rows) and coded credential = completed bachelor-level or higher degree, decided by category label. ID is v3 (2009) and caseid (2019), validated against the cumulation (53,213 rows, tertiary split agrees). Old DEGREE = 5 kept as credential_degree5.
+**Result**
+Wave-to-wave jumps shrink (Denmark +50 to +13 points) but real rises remain (Israel, Czech Republic). Sample unchanged (n = 38,010, 25 countries). Crosswalk omits 2009 for AU, DE, JP, NZ, US.
+**Status**
+Done for the main sample. Open: extend crosswalk, ISCO-88 robustness variant, centering decision.
