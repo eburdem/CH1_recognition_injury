@@ -5,7 +5,7 @@
 #' ---------
 
 library(dplyr)
-merged        <- readRDS("data/interim/issp_merged.rds")
+merged <- readRDS("data/interim/issp_analysis.rds")
 issp_raw      <- readRDS("data/interim/issp_raw.rds")
 country_level <- readRDS("data/interim/country_level_vars.rds")
 
