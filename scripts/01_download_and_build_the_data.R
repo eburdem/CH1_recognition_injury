@@ -30,7 +30,9 @@ issp <- issp_raw %>%
     age        = if_else(age > 0, age, NA_real_),
     age_sq     = age^2,
     gender     = case_when(sex == 1 ~ 0, sex == 2 ~ 1),             # 1 = female
-    isco88     = isco88
+    isco88     = isco88,
+    iso        = sub("^[0-9]+\\. ([A-Z]{2})-.*", "\\1", as.character(as_factor(country))),
+    id         = caseid
   ) %>%
   zap_labels()
 
