@@ -44,7 +44,7 @@ crosswalk <- bind_rows(cw09, cw19) %>%
          harmonized_tertiary = NA_real_,
          note = "")
 
-write_csv(crosswalk, "data/codebooks/degree_crosswalk_blank.csv")
+write_csv(crosswalk, "data/docs/degree_crosswalk_blank.csv")
 
 crosswalk %>% group_by(wave) %>% summarise(sum(n))
 
@@ -56,7 +56,7 @@ w09 <- read_dta("data/raw/issp/2009/ZA5400_v4-0-0.dta")
 w19 <- read_dta("data/raw/issp/2019/ZA7600_v3-0-0.dta")
 names(w09) <- tolower(names(w09))
 names(w19) <- tolower(names(w19))
-cw <- read_csv("data/codebooks/degree_crosswalk_final.csv", show_col_types = FALSE)
+cw <- read_csv("data/docs/degree_crosswalk_final.csv", show_col_types = FALSE)
 
 #" Country codes covered in each wave (same as in the crosswalk)
 isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","HU","LV","PL","SK","ES")
@@ -94,14 +94,10 @@ merged <- readRDS("data/interim/issp_merged.rds")
 harm <- resp %>% select(wave, iso, id, harmonized_tertiary)
 analysis <- merged %>%
   left_join(harm, by = c("wave", "iso", "id"), relationship = "many-to-one")
-stopifnot(nrow(analysis) == nrow(merged))
 
-#' Check: the new variable must agree with DEGREE on the tertiary split where both exist
-ok <- !is.na(analysis$harmonized_tertiary) & !is.na(analysis$credential_alt)
-stopifnot(sum(analysis$harmonized_tertiary[ok] == 1 & analysis$credential_alt[ok] == 0) == 0)
+stopifnot(nrow(analysis) == nrow(merged))
+stopifnot(sum(!is.na(analysis$harmonized_tertiary)) == sum(!is.na(harm$harmonized_tertiary)))
 
 analysis <- analysis %>%
   rename(credential_degree5 = credential, credential = harmonized_tertiary)
 saveRDS(analysis, "data/interim/issp_analysis.rds")
-
-

@@ -19,8 +19,10 @@ saveRDS(issp_raw, "data/interim/issp_raw.rds")
 
 issp <- issp_raw %>%
   transmute(
+    iso        = sub("^[0-9]+\\. ([A-Z]{2})-.*", "\\1", as.character(as_factor(country))),
     country    = recode(sub("^[0-9]+\\. [A-Z]{2}-", "", as.character(as_factor(country))),
                         "United States" = "USA", "Slovak Republic" = "Slovakia"),
+    id         = caseid,
     wave       = year,
     sss        = if_else(topbot %in% 1:10, topbot, NA_real_),
     credential = case_when(degree == 5 ~ 1, degree %in% 0:4 ~ 0),   # tertiary = degree 5 only
@@ -30,9 +32,7 @@ issp <- issp_raw %>%
     age        = if_else(age > 0, age, NA_real_),
     age_sq     = age^2,
     gender     = case_when(sex == 1 ~ 0, sex == 2 ~ 1),             # 1 = female
-    isco88     = isco88,
-    iso        = sub("^[0-9]+\\. ([A-Z]{2})-.*", "\\1", as.character(as_factor(country))),
-    id         = caseid
+    isco88     = isco88
   ) %>%
   zap_labels()
 
@@ -77,7 +77,3 @@ merged <- left_join(issp, country_level, by = c("country", "wave"))
 stopifnot(nrow(merged) == nrow(issp))  
 
 saveRDS(merged, "data/interim/issp_merged.rds")
-
-
-#' After 04_degree_variable
-intersect(names(w09), names(issp_raw))

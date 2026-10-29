@@ -14,7 +14,7 @@ dir.create("data/processed", showWarnings = FALSE)
 dir.create("output/tables", recursive = TRUE, showWarnings = FALSE)
 
 
-merged        <- readRDS("data/interim/issp_merged.rds")
+merged <- readRDS("data/interim/issp_analysis.rds")
 
 #' Sample: filters
 model_vars <- c("sss", "credential", "ind_belief", "income", "isei",
