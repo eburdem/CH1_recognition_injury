@@ -75,3 +75,7 @@ merged <- left_join(issp, country_level, by = c("country", "wave"))
 stopifnot(nrow(merged) == nrow(issp))  
 
 saveRDS(merged, "data/interim/issp_merged.rds")
+
+
+#' After 04_degree_variable
+intersect(names(w09), names(issp_raw))
