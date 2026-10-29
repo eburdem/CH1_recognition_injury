@@ -1,10 +1,13 @@
-data/
- *.dta
- *.sav
- *.rds
- *.rda
- *.RData
- *.RDataTmp*
+data/*
+!data/docs/
+
+*.dta
+*.sav
+*.rds
+*.rda
+*.RData
+*.RDataTmp*
+
 .Rhistory
 .Rproj.user/
 .Ruserdata
