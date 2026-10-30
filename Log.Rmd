@@ -362,4 +362,6 @@ Cubed years correlate .89 with raw years and .62 with tertiary (.60 raw), but ch
 **Status**
 Done for now. Open: run the EDUCYRS sensitivity models after the main models.
 
-
+## 2026-10-30 Scripts split and renumbered
+Script 03 mixed building the analytic sample with descriptives, and 01_02 mixed a one-off crosswalk generator with the harmonizer.
+Split into 02 (generator, writes only to _blank), 03 (harmonizer), 04 checks, 05 sample, 06 descriptives, 07 EDUCYRS variant. Every script starts with its own library() calls and loads inputs from disk. Key checks are stopifnot() guards.
