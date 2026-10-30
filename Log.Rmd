@@ -365,3 +365,30 @@ Done for now. Open: run the EDUCYRS sensitivity models after the main models.
 ## 2026-10-30 Scripts split and renumbered
 Script 03 mixed building the analytic sample with descriptives, and 01_02 mixed a one-off crosswalk generator with the harmonizer.
 Split into 02 (generator, writes only to _blank), 03 (harmonizer), 04 checks, 05 sample, 06 descriptives, 07 EDUCYRS variant. Every script starts with its own library() calls and loads inputs from disk. Key checks are stopifnot() guards.
+
+
+## 2026-10-30 Centering unit for the REWB model
+**Context**: Anthony advised centering within country; my original specification centered within country-wave.
+The harmonized credential removed most of the wave shift, so I needed to check whether the choice still matters.
+**Decision**: Main models center within country; within country-wave is a sensitivity run.
+**Result**: The two within-credential versions correlate at 0.996; differences are 0 for single-wave countries and at most SD 0.11 (Israel) elsewhere.
+**Status**: Done for credential. Belief not yet checked.
+
+## 2026-10-30 Null model and ICC
+**Context** Checked how much of the variation in SSS lies between countries.
+The null model ignores the unbalanced country-wave structure.
+**Decision**: Use a two-level model with country as the cluster for the main analysis; check a country-wave variance component as a sensitivity.
+**Result**: ICC = 0.166 (country variance 0.51, residual 2.55; grand mean 5.38; 25 countries, n = 38,010).
+
+## 2026-10-30 Country-wave variance in SSS
+**Context**: Anthony noted the unbalanced country-wave data needs to be accounted for in the nesting.
+**What went wrong**: The first null model treated each country as one cluster across both waves and ignored wave-to-wave differences.
+**Decision**: Main models use country as the cluster plus a wave fixed effect; a country-wave random intercept is a sensitivity.
+**Result**: Variance shares: country 12.5%, country-wave 5.1%, residual 82.4% (LRT chi-square 648.8, 1 df). Total ICC about 17.6%.
+
+## 2026-10-30 Baseline injury model
+**Context** how large is the credential gap in SSS, and how much of it is material?
+**Decision** m2 (credential within/between, wave, income, ISEI within/between, age, age squared, gender, random credential slope by country) is the baseline for the interaction models.
+**Result**
+Within-country credential gap 0.97 without controls, 0.41 with them (57.5% smaller); remaining penalty positive in nearly all countries (slope SD 0.15). Credential between countries is not interpretable in m2 (entangled with ISEI between).
+A scale warning from age squared, to fix by rescaling age.
