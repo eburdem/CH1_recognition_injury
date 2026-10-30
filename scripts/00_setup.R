@@ -3,13 +3,15 @@
 #' ------------------------------
 #' 00_setup
 #' -------
-#' install packages
-#' install.packages("tidyverse") 
+
+#'   install.packages("tidyverse") 
 #'   install.packages("dplyr")
 #'   install.packages("readr")
 #'   install.packages("ggplot2")
 #'   install.packages("lme4")
 #'   install.packages("lmerTest")
+#'   install.packages("haven")
+#'   install.packages("tidyr")
 
 
 renv::snapshot()

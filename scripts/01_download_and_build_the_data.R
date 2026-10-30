@@ -3,7 +3,7 @@
 #' ------------------------------
 #' 01_download_and_build_the_data
 #' ------------------------------
-getwd()
+
 library(haven)
 library(dplyr)
 library(readr)
@@ -19,13 +19,13 @@ saveRDS(issp_raw, "data/interim/issp_raw.rds")
 
 issp <- issp_raw %>%
   transmute(
-    iso        = sub("^[0-9]+\\. ([A-Z]{2})-.*", "\\1", as.character(as_factor(country))),
+    iso        = sub("^[0-9]+\\. ([A-Z]{2})-.*", "\\1", as.character(as_factor(country))), # must stay above country
     country    = recode(sub("^[0-9]+\\. [A-Z]{2}-", "", as.character(as_factor(country))),
                         "United States" = "USA", "Slovak Republic" = "Slovakia"),
     id         = caseid,
     wave       = year,
     sss        = if_else(topbot %in% 1:10, topbot, NA_real_),
-    credential = case_when(degree == 5 ~ 1, degree %in% 0:4 ~ 0),   # tertiary = degree 5 only
+    credential = case_when(degree == 5 ~ 1, degree %in% 0:4 ~ 0),   # DEGREE = 5 only; becomes credential_degree5 in script 03
     credential_alt = case_when(degree >= 4 ~ 1, degree %in% 0:3 ~ 0),   # post-secondary or higher
     ind_belief = if_else(v6 %in% 1:5, 6 - v6, NA_real_),            # 5 = strongest endorsement
     income     = factor(if_else(income %in% 1:3, income, NA_real_)),
@@ -47,17 +47,15 @@ issp <- left_join(issp, isei_lookup, by = "isco88")
 strat <- read_csv("data/raw/macro/oecd/age_of_first_selection.csv", show_col_types = FALSE) %>%
   transmute(country, stratification = max(age_first_selection, na.rm = TRUE) - age_first_selection)
 
+name_fix <- c("United States" = "USA", "United Kingdom" = "Great Britain",
+              "Czechia" = "Czech Republic", "Slovak Republic" = "Slovakia",
+              "Korea, Rep." = "Korea", "Turkey" = "Turkiye")
 wdi <- read_csv("data/raw/macro/worldbank/wdi_gdp_tertiary_1995_2020.csv", show_col_types = FALSE) %>%
-  mutate(country = recode(country,
-                          "United States" = "USA", "United Kingdom" = "Great Britain",
-                          "Czechia" = "Czech Republic", "Slovak Republic" = "Slovakia",
-                          "Korea, Rep." = "Korea")) %>%
+  mutate(country = recode(country, !!!name_fix)) %>%
   select(country, wave = year, gdp_pc, tertiary)
 
 swiid <- read_csv("data/raw/macro/swiid/swiid9_92_summary.csv", show_col_types = FALSE) %>%
-  mutate(country = recode(country,
-                          "United States" = "USA", "United Kingdom" = "Great Britain",
-                          "Turkey" = "Turkiye")) %>%
+  mutate(country = recode(country, !!!name_fix)) %>%
   select(country, wave = year, gini = gini_disp)
 
 #' tertiary is NA for six country-waves in 2009 (Australia, Germany, Japan, NZ, Portugal, USA);
@@ -77,3 +75,4 @@ merged <- left_join(issp, country_level, by = c("country", "wave"))
 stopifnot(nrow(merged) == nrow(issp))  
 
 saveRDS(merged, "data/interim/issp_merged.rds")
+stopifnot(!anyDuplicated(merged[c("wave", "iso", "id")]))

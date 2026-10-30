@@ -1,7 +1,7 @@
 #' ------------------------------
 #' CHAPTER 1 - RECOGNITION INJURY 
 #' ------------------------------
-#' 02_checks
+#' 04_checks
 #' ---------
 
 library(dplyr)
@@ -18,6 +18,7 @@ attr(issp_raw$sex, "labels")
 #' Old vs new recodes
 table(issp_raw$v6,     merged$ind_belief, useNA = "ifany")
 table(issp_raw$degree, merged$credential, useNA = "ifany")
+table(issp_raw$degree, merged$credential_degree5, useNA = "ifany")
 table(issp_raw$income, merged$income,     useNA = "ifany")
 table(issp_raw$sex,    merged$gender,     useNA = "ifany")
 summary(issp_raw$age); summary(merged$age); summary(merged$age_sq)
@@ -32,7 +33,8 @@ nrow(merged) == nrow(issp_raw)
 table(merged$wave)                              
 table(merged$country, merged$wave)
 table(merged$wave, is.na(merged$ind_belief))     
-anyDuplicated(country_level[, c("country", "wave")])   
+stopifnot(anyDuplicated(country_level[, c("country", "wave")]) == 0)
+stopifnot(!anyDuplicated(merged[c("wave", "iso", "id")]))
 sort(unique(merged$country))
 
 #' Missingness

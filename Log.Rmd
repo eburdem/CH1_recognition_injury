@@ -349,3 +349,17 @@ Built a country-by-wave crosswalk (504 rows) and coded credential = completed ba
 Wave-to-wave jumps shrink (Denmark +50 to +13 points) but real rises remain (Israel, Czech Republic). Sample unchanged (n = 38,010, 25 countries). Crosswalk omits 2009 for AU, DE, JP, NZ, US.
 **Status**
 Done for the main sample. Open: extend crosswalk, ISCO-88 robustness variant, centering decision.
+
+## 2026-10-30 EDUCYRS as an alternative to DEGREE 
+**Context**
+Anthony suggested EDUCYRS, perhaps cubed, ideally with published precedent. Built in a separate script (05_educyrs_variant.R) so the main pipeline is untouched.
+**What went wrong**
+I found no published precedent for cubing years of schooling. EDUCYRS has its own wave discontinuity: it rises between waves in most countries, and Switzerland jumps 3.3 years (11.4 to 14.7) because the 2009 answers cluster at 9 years. It is also missing for 94.5% of rows only (versus 98.9% for DEGREE), unevenly by country. My earlier note that its means were stable across waves was wrong for Switzerland, France and Israel.
+**Decision**
+Keep the crosswalk credential as the main measure. Use EDUCYRS (raw and cubed) only as a sensitivity analysis, and ask Anthony for the paper he had in mind.
+**Result**
+Cubed years correlate .89 with raw years and .62 with tertiary (.60 raw), but change the construct from lacking a credential to graded schooling.
+**Status**
+Done for now. Open: run the EDUCYRS sensitivity models after the main models.
+
+
