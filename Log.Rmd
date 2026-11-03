@@ -392,3 +392,23 @@ The null model ignores the unbalanced country-wave structure.
 **Result**
 Within-country credential gap 0.97 without controls, 0.41 with them (57.5% smaller); remaining penalty positive in nearly all countries (slope SD 0.15). Credential between countries is not interpretable in m2 (entangled with ISEI between).
 A scale warning from age squared, to fix by rescaling age.
+
+## 2026-10-30 H1/H2/H3 interaction models on the rebuilt data
+**Context**: Fitted the three interaction models on the rebuilt data (harmonized tertiary credential, n = 38,010, 25 countries, waves 2009 and 2019). All use explicit formulas with within/between decomposition (REWB), wave fixed effects, income, ISEI (within and between), age (age10, age10_sq) and gender, and a random credential slope by country: (1 + credential_w | country). H1: credential_w × belief_w. H2: credential_w × stratification_c. H3: credential_w × belief_w × stratification_c.
+
+The earlier repo's p-values (H1 .024, H2 .126, H3 .059) came from the DEGREE = 5 credential and no longer apply; they should not be quoted.
+
+**Decision**: H1 has weak support, H2 as a null with a wide interval and H3 as not supported. belief_w × stratification_c are as exploratory only. With three interaction tests, the H1 p-value (.038) would not survive a multiple-testing correction.
+
+**Result**: 
+H1: credential_w × belief_w = +0.041 (SE 0.020, p = .038). 
+H2: credential_w × stratification_c = +0.021 (SE 0.015, p = .190). 
+H3: three-way = +0.008 (SE 0.009, p = .383). 
+Exploratory: 
+belief_w × stratification_c = -0.007 (p = .072). 
+Credential gap at average belief and stratification: 0.41. 
+Random-slope variance barely falls with stratification (0.0235 to 0.0226), so the country variation in the credential gap stays unexplained.
+
+
+
+
