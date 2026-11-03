@@ -68,4 +68,4 @@ range(loo_h3$estimate); sum(loo_h3$p < .05)
 saveRDS(loo_h3, "data/processed/loo_h3.rds")
 write_csv(loo_h3, "output/tables/loo_h3.csv")
 
-
+sapply(c("loo_h1", "loo_h2", "loo_h3"), function(x) mean(read_csv(paste0("output/tables/", x, ".csv"))$estimate))
