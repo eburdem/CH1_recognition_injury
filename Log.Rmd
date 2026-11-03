@@ -410,5 +410,13 @@ Credential gap at average belief and stratification: 0.41.
 Random-slope variance barely falls with stratification (0.0235 to 0.0226), so the country variation in the credential gap stays unexplained.
 
 
+## 2026-11-03 Marginal effects for H1 and H2
+
+**Context**: I have put the interaction results on a readable scale with emmeans::emtrends (credential gap at chosen values of belief and stratification) and plotted the gap with 83.5% bands.
+
+**Decision**: The gap at -1 SD, average and +1 SD of belief, and at the lowest, average and highest stratification, with 95% CIs. Using the 83.5% band plots as figures. Do not read differences from the plots alone.
+
+**Result**
+H1: gap 0.377 / 0.412 / 0.448 (95% CI 0.296 to 0.528), positive at every belief level. H2: gap 0.348 / 0.413 / 0.514 (95% CI 0.228 to 0.678); the intervals at the extremes overlap.
 
 
