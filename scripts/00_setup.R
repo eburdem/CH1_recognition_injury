@@ -12,6 +12,6 @@
 #'   install.packages("lmerTest")
 #'   install.packages("haven")
 #'   install.packages("tidyr")
-
+#'   install.packages("emmeans")
 
 renv::snapshot()
