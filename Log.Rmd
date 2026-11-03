@@ -325,4 +325,16 @@ Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at t
 **Decision**: Keeping the models without controls as the main specification.
 **Result**: H1 +0.0448 (p = .017), H2 +0.0235 (p = .128), H3 +0.0096 (p = .252): the same as the main models.
 
+## 2026-11-03 Leave-one-country-out on the extended sample (n = 42,714)
+**Context**: Refitted the H1, H2 and H3 models 25 times, dropping one country each time.
+
+**What went wrong**: Two CSV writes used loo_h1 for loo_h2.csv and loo_h3.csv (copy-paste slip); fixed and rewritten.
+
+**Decision**: Will report the range and the number of significant fits for each hypothesis, not only the headline estimate.
+
+**Result**
+H1: estimates 0.034 to 0.057, p < .05 in 22 of 25 (above .05 only without the USA, Israel or Austria). 
+H2: 0.016 to 0.034, p < .05 in 3 of 25 (without Finland, Czech Republic or Germany). 
+H3: 0.002 to 0.018, p < .05 in 1 of 25 (without the USA, p = .038). No sign reversals.
+
 

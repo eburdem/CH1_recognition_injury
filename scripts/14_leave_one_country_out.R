@@ -7,6 +7,7 @@
 library(dplyr)
 library(lme4)
 library(lmerTest)
+library(readr)
 
 d3   <- readRDS("data/processed/d3_models.rds")
 mods <- readRDS("data/processed/models_h123.rds")
@@ -40,7 +41,7 @@ for (cn in countries) {
 }
 loo_h2 <- bind_rows(res_h2)
 saveRDS(loo_h2, "data/processed/loo_h2.rds")
-write_csv(loo_h1, "output/tables/loo_h2.csv")
+write_csv(loo_h2, "output/tables/loo_h2.csv")
 
 #' Results
 loo_h1 %>% arrange(desc(p))
@@ -60,5 +61,11 @@ for (cn in countries) {
   print(cn)
 }
 loo_h3 <- bind_rows(res_h3)
+
+loo_h3 %>% arrange(p)
+range(loo_h3$estimate); sum(loo_h3$p < .05)
+
 saveRDS(loo_h3, "data/processed/loo_h3.rds")
-write_csv(loo_h1, "output/tables/loo_h3.csv")
+write_csv(loo_h3, "output/tables/loo_h3.csv")
+
+

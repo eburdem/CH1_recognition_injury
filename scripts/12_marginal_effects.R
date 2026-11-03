@@ -6,6 +6,8 @@
 
 library(emmeans)
 library(readr)
+library(lmerTest)
+library(lme4)
 
 d3   <- readRDS("data/processed/d3_models.rds")
 mods <- readRDS("data/processed/models_h123.rds")
