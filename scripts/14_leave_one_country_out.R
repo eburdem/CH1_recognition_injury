@@ -26,6 +26,7 @@ for (cn in countries) {
 }
 loo_h1 <- bind_rows(res_h1)
 saveRDS(loo_h1, "data/processed/loo_h1.rds")
+write_csv(loo_h1, "output/tables/loo_h1.csv")
 
 #' H2: credential_w:stratification_c
 res_h2 <- list()
@@ -39,6 +40,7 @@ for (cn in countries) {
 }
 loo_h2 <- bind_rows(res_h2)
 saveRDS(loo_h2, "data/processed/loo_h2.rds")
+write_csv(loo_h1, "output/tables/loo_h2.csv")
 
 #' Results
 loo_h1 %>% arrange(desc(p))
@@ -59,3 +61,4 @@ for (cn in countries) {
 }
 loo_h3 <- bind_rows(res_h3)
 saveRDS(loo_h3, "data/processed/loo_h3.rds")
+write_csv(loo_h1, "output/tables/loo_h3.csv")
