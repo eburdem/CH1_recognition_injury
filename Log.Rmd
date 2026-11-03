@@ -49,6 +49,8 @@ entirely; Canada has only 1999).
 countries enter the main model with 2019 only. Planned sensitivity check: refit 
 without `tertiary` as a control.
 
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
+
 ## [2026-10-27] Respondents aged 15–17 kept
 **Decision:** Only `AGE = -9` set to `NA`. 455 respondents aged 15–17 and one 
 aged 105 are retained. Restricting to 18+ is a possible sensitivity check.
@@ -61,6 +63,8 @@ Same as the old pipeline (25 countries,n = 38,010). `drop_na()` names the model
 variables explicitly. Canada leaves at the wave step (1999 only); the 8 
 countries without OECD coverage leave at the stratification step; Portugal
 leaves at the complete-case step (no 2019 wave, tertiary missing in 2009).
+
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
 
 ## [2026-10-27] Missingness is patterned by country and not by wave
 **Result (26-country sample, before complete cases):** income missing 17.8% 
@@ -78,10 +82,14 @@ Australia keeps 658 respondents, Spain 486, Switzerland 3,077. Australia,
 Germany, Japan, USA and New Zealand contribute 2019 only (tertiary gap). The low 
 end of stratification (Australia, NZ, USA) is hit hardest.
 
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
+
 ## [2026-10-27] Sensitivity sample without tertiary
 **Result:** dropping `tertiary` from the complete-case rule gives n = 43,211 in 
 26 countries (Portugal returns; five countries regain their 2009 wave). Planned 
 as a robustness run.
+
+Superseded 2026-11-03: this is now the main sample (n = 42,714, 25 countries).
 
 ## [2026-10-27] The analytic sample is selected
 **Result:** sample at each step (2009/2019 data → 26 countries → complete cases): 
@@ -90,12 +98,16 @@ mean age 48.4 → 50.2 → 50.9. The SSS rise comes from the country filter
 (the 8 dropped countries average SSS 4.70); the tertiary rise comes from the 
 complete-case step.
 
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
+
 ## [2026-10-27] Univariate descriptives (n = 38,010)
 **Result:** SSS mean 5.46, SD 1.72, range 1–10, roughly bell-shaped (histogram, binwidth 1).
 Belief (1–5): mean 3.89, SD 0.90, median 4, upper quartile at the maximum (ceiling); 
 +1 SD is about 0.9 of a scale point. ISEI mean 46.4 (SD 17.5, 16–90); 
 age mean 50.9 (SD 16.3, 15–99). 30.7% tertiary; income terciles 32/33/35%; 
 52.7% female; 45% 2009, 55% 2019.
+
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
 
 **Plots:** SSS roughly bell-shaped; income terciles nearly even (top tercile slightly
 over-represented); belief strongly left-skewed with mode at 4 (about 70% in categories 4–5,
@@ -126,6 +138,8 @@ only. Stratification has 7 distinct values; Italy (4), Switzerland (6) and the C
 are alone at their value. Country mean SSS 3.96 (Hungary) to 6.46 (New Zealand); tertiary
 share 5% to 58%. Country-level correlations: stratification–tertiary share −0.47,
 tertiary share–mean SSS +0.77. WDI tertiary enrolment is a gross ratio (110 in Australia 2019).
+
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
 
 ## [2026-10-28] Tertiary cut (DEGREE = 5) is not equally clean across countries
 **Result:** DEGREE category 4 is 20–34% of respondents in Switzerland, Denmark, Australia,
@@ -194,15 +208,15 @@ First join key (v2) was the data version string, not an ID; the iso code was bui
 **Decision**
 Built a country-by-wave crosswalk (504 rows) and coded credential = completed bachelor-level or higher degree, decided by category label. ID is v3 (2009) and caseid (2019), validated against the cumulation (53,213 rows, tertiary split agrees). Old DEGREE = 5 kept as credential_degree5.
 **Result**
-Wave-to-wave jumps shrink (Denmark +50 to +13 points) but real rises remain (Israel, Czech Republic). Sample unchanged (n = 38,010, 25 countries). Crosswalk omits 2009 for AU, DE, JP, NZ, US.
+Wave-to-wave jumps shrink (Denmark +50 to +13 points) but real rises remain (Israel, Czech Republic). Sample unchanged (n = 38,010, 25 countries). 
 **Status**
-Done for the main sample. Open: extend crosswalk, ISCO-88 robustness variant, centering decision.
+Done for the main sample. Crosswalk extended to 2009 for AU, DE, JP, NZ, US on 2026-11-03 (see entry). Open: ISCO-88 robustness variant.
 
 ## 2026-10-30 EDUCYRS as an alternative to DEGREE 
 **Context**
-Anthony suggested EDUCYRS, perhaps cubed, ideally with published precedent. Built in a separate script (05_educyrs_variant.R) so the main pipeline is untouched.
+Anthony suggested EDUCYRS, perhaps cubed, ideally with published precedent. Built in a separate script, so the main pipeline is untouched.
 **What went wrong**
-I found no published precedent for cubing years of schooling. EDUCYRS has its own wave discontinuity: it rises between waves in most countries, and Switzerland jumps 3.3 years (11.4 to 14.7) because the 2009 answers cluster at 9 years. It is also missing for 94.5% of rows only (versus 98.9% for DEGREE), unevenly by country. My earlier note that its means were stable across waves was wrong for Switzerland, France and Israel.
+I found no published precedent for cubing years of schooling. EDUCYRS has its own wave discontinuity: it rises between waves in most countries, and Switzerland jumps 3.3 years (11.4 to 14.7) because the 2009 answers cluster at 9 years. It is present for 94.5% of rows (versus 98.9% for DEGREE). My earlier note that its means were stable across waves was wrong for Switzerland, France and Israel.
 **Decision**
 Keep the crosswalk credential as the main measure. Use EDUCYRS (raw and cubed) only as a sensitivity analysis, and ask Anthony for the paper he had in mind.
 **Result**
@@ -257,6 +271,7 @@ belief_w × stratification_c = -0.007 (p = .072).
 Credential gap at average belief and stratification: 0.41. 
 Random-slope variance barely falls with stratification (0.0235 to 0.0226), so the country variation in the credential gap stays unexplained.
 
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
 
 ## 2026-11-03 Marginal effects for H1 and H2
 
@@ -267,6 +282,8 @@ Random-slope variance barely falls with stratification (0.0235 to 0.0226), so th
 **Result**
 H1: gap 0.377 / 0.412 / 0.448 (95% CI 0.296 to 0.528), positive at every belief level. H2: gap 0.348 / 0.413 / 0.514 (95% CI 0.228 to 0.678); the intervals at the extremes overlap.
 
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
+
 ## 2026-11-03 Country-level controls as a sensitivity run
 **Context**: Added Gini, log GDP per capita and tertiary enrolment to H1, H2 and H3 to check whether omitting them drives the results. These vary by wave (2 values per country), so I used country means, centered on the mean of the 25 country means.
 
@@ -276,6 +293,7 @@ credential_b has a very large SE (about 1.9): its between-country SD is only 0.1
 
 **Result**
 H1 +0.0407 (p = .038), H2 +0.0209 (p = .187), H3 +0.0081 (p = .383): identical to the main models. No control is significant. Random-slope variance unchanged (0.0225 to 0.0234).
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
 
 ## 2026-11-03 Leave-one-country-out for H1 and H2
 **Context**: Refit m_h1 and m_h2 25 times, dropping one country each time, to see whether any single country drives the interactions.
@@ -285,4 +303,26 @@ H1 +0.0407 (p = .038), H2 +0.0209 (p = .187), H3 +0.0081 (p = .383): identical t
 **Result**
 H1: estimates 0.032 to 0.054, p below .05 in 18 of 25 fits (p from .009 to .112; dropping Austria, Israel, France, USA, Poland, Slovakia or Latvia gives p > .05; dropping Norway strengthens it). 
 H2: estimates 0.012 to 0.032, p below .05 in 1 of 25 (Czech Republic, p = .048). No country reverses either effect.
+Superseded 2026-11-03: based on n = 38,010; see the extended-sample entries at the end.
+
+## 2026-11-03 Extended crosswalk and main sample
+**Context**: Ten of 25 countries had one wave. Five (Hungary, Latvia, Poland, Slovakia, Spain) did not take part in ISSP 2019, so nothing can be fixed. Australia, Germany, Japan, New Zealand and the USA were missing their 2009 data.
+
+**What went wrong**: Two causes. The crosswalk had no 2009 rows for these five countries, and the sample filter in script 05 required the WDI tertiary variable, which is missing for their 2009 wave although no main model uses it. Script 03 also needed the five countries in isos_2009.
+
+**Decision**: Added 44 crosswalk rows (548 in total). The main sample no longer requires the country-level controls; they are a robustness run.
+
+**Result**: n = 42,714 (was 38,010), 25 countries, 45 country-waves (20 with two waves, 5 with one).
+
+## 2026-11-03 H1/H2/H3 on the extended sample
+**Result**: H1 +0.045 (p = .017), H2 +0.023 (p = .132), H3 +0.0096 (p = .25).
+**Decision**: Same conclusion as before: H1 weak support, H2 and H3 not supported. These numbers replace the 38,010-sample results.
+**Status**: Marginal effects rerun (H1 gap 0.378 / 0.416 / 0.455; H2 0.345 / 0.419 / 0.531). Leave-one-out still to rerun.
+
+## 2026-11-03 Country-level controls on the extended sample
+**Context**: Added Gini, log GDP per capita and tertiary enrolment (country means) to H1, H2 and H3 on n = 42,714.
+**What went wrong**: tertiary is missing for 2009 in five countries, so mean(tertiary) gave NA and lmer failed; fixed with na.rm = TRUE.
+**Decision**: Keeping the models without controls as the main specification.
+**Result**: H1 +0.0448 (p = .017), H2 +0.0235 (p = .128), H3 +0.0096 (p = .252): the same as the main models.
+
 
