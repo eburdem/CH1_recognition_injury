@@ -42,3 +42,6 @@ m_h3 <- lmer(sss~ credential_w * belief_w* stratification_c + credential_b + bel
                (1 + credential_w | country), data = d3)
 
 summary(m_h3)    
+
+saveRDS(d3, "data/processed/d3_models.rds")
+saveRDS(list(m_h1 = m_h1, m_h2 = m_h2, m_h3 = m_h3), "data/processed/models_h123.rds")

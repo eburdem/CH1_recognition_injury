@@ -6,6 +6,10 @@
 
 library(emmeans)
 
+d3   <- readRDS("data/processed/d3_models.rds")
+mods <- readRDS("data/processed/models_h123.rds")
+m_h1 <- mods$m_h1; m_h2 <- mods$m_h2; m_h3 <- mods$m_h3
+
 #' H1: credential gap at belief -1 SD, 0, +1 SD (within country)
 
 sd_b <- sd(d3$belief_w)
