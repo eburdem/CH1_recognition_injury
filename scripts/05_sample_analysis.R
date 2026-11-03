@@ -15,8 +15,7 @@ dir.create("output/tables", recursive = TRUE, showWarnings = FALSE)
 merged <- readRDS("data/interim/issp_analysis.rds")
 
 #' Sample: filters
-model_vars <- c("sss", "credential", "ind_belief", "income", "isei",
-                "age", "gender", "gini", "gdp_pc", "tertiary")
+model_vars <- c("sss", "credential", "ind_belief", "income", "isei", "age", "gender")
 
 d1 <- merged %>% filter(wave %in% c(2009, 2019));        nrow(d1)
 d2 <- d1 %>% filter(!is.na(stratification));         nrow(d2); n_distinct(d2$country)  
@@ -64,11 +63,6 @@ retention <- d2 %>%
 print(retention, n=30)
 
 write_csv(retention, "output/tables/country_retention.csv")
-
-#' Sensitivity sample without tertiary
-d_notert <- d2 %>% drop_na(all_of(setdiff(model_vars, "tertiary")))
-nrow(d_notert); n_distinct(d_notert$country)
-saveRDS(d_notert, "data/processed/d_notert.rds")
 
 #' Sensitivity sample with credential_alt instead of credential
 d2 %>% drop_na(all_of(c(setdiff(model_vars, "credential"), "credential_alt"))) %>% nrow()

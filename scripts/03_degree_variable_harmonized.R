@@ -14,7 +14,8 @@ names(w19) <- tolower(names(w19))
 cw <- read_csv("data/docs/degree_crosswalk_final.csv", show_col_types = FALSE)
 
 #' Country codes covered in each wave (same as in the crosswalk)
-isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","HU","LV","PL","SK","ES")
+isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","HU","LV","PL","SK","ES",
+               "AU","DE","JP","NZ","US")
 isos_2019 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","AU","DE","JP","NZ","US")
 
 #' Respondent table: id is v3 in 2009 and caseid in 2019

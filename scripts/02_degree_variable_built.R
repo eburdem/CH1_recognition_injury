@@ -5,7 +5,7 @@
 #' ------------------------
 
 #' ONE-OFF. Already run on 2026-10-28; the filled file is degree_crosswalk_final.csv.
-#' Writes only to degree_crosswalk_blank.csv. Never write to the final file.
+#' WWrites only to degree_crosswalk_blank.csv and degree_crosswalk_2009_extra_blank.csv
 
 library(haven)
 library(dplyr)
@@ -32,8 +32,6 @@ tab_one <- function(d, iso, wave) {
            nat_label = names(labs)[match(nat_code, labs)])
 }
 
-tab_one(w19, "DK", 2019)    
-
 
 isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","HU","LV","PL","SK","ES")
 isos_2019 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","AU","DE","JP","NZ","US")
@@ -49,4 +47,17 @@ crosswalk <- bind_rows(cw09, cw19) %>%
 write_csv(crosswalk, "data/docs/degree_crosswalk_blank.csv")
 
 crosswalk %>% group_by(wave) %>% summarise(sum(n))
+
+#'
+isos_2009_extra <- c("AU","DE","JP","NZ","US")
+
+cw09_extra <- bind_rows(lapply(isos_2009_extra, function(i) tab_one(w09, i, 2009)))
+
+crosswalk_extra <- cw09_extra %>%
+  mutate(degree_cumulation = degree_original,
+         harmonized_tertiary = NA_real_,
+         note = "")
+
+write_csv(crosswalk_extra, "data/docs/degree_crosswalk_2009_extra_blank.csv")
+crosswalk_extra %>% group_by(iso) %>% summarise(sum(n))
 
