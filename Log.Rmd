@@ -429,3 +429,12 @@ credential_b has a very large SE (about 1.9): its between-country SD is only 0.1
 **Result**
 H1 +0.0407 (p = .038), H2 +0.0209 (p = .187), H3 +0.0081 (p = .383): identical to the main models. No control is significant. Random-slope variance unchanged (0.0225 to 0.0234).
 
+## 2026-11-03 Leave-one-country-out for H1 and H2
+**Context**: Refit m_h1 and m_h2 25 times, dropping one country each time, to see whether any single country drives the interactions.
+
+**Decision**: H1 is consistently positive but not stable in significance, and H2 is consistently positive but not significant. I will report the full range, not only the headline estimate.
+
+**Result**
+H1: estimates 0.032 to 0.054, p below .05 in 18 of 25 fits (p from .009 to .112; dropping Austria, Israel, France, USA, Poland, Slovakia or Latvia gives p > .05; dropping Norway strengthens it). 
+H2: estimates 0.012 to 0.032, p below .05 in 1 of 25 (Czech Republic, p = .048). No country reverses either effect.
+
