@@ -45,3 +45,10 @@ summary(m_h3)
 
 saveRDS(d3, "data/processed/d3_models.rds")
 saveRDS(list(m_h1 = m_h1, m_h2 = m_h2, m_h3 = m_h3), "data/processed/models_h123.rds")
+
+
+main_rows <- rbind(
+  H1 = summary(m_h1)$coefficients["credential_w:belief_w", ],
+  H2 = summary(m_h2)$coefficients["credential_w:stratification_c", ],
+  H3 = summary(m_h3)$coefficients["credential_w:belief_w:stratification_c", ])
+write.csv(main_rows, "output/tables/main_interactions.csv")

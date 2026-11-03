@@ -45,3 +45,10 @@ m_h3_ctrl <- lmer(sss ~ credential_w * belief_w * stratification_c + credential_
 summary(m_h1_ctrl)$coefficients["credential_w:belief_w", ]
 summary(m_h2_ctrl)$coefficients["credential_w:stratification_c", ]
 summary(m_h3_ctrl)$coefficients["credential_w:belief_w:stratification_c", ]
+
+
+ctrl_rows <- rbind(
+  H1 = summary(m_h1_ctrl)$coefficients["credential_w:belief_w", ],
+  H2 = summary(m_h2_ctrl)$coefficients["credential_w:stratification_c", ],
+  H3 = summary(m_h3_ctrl)$coefficients["credential_w:belief_w:stratification_c", ])
+write.csv(ctrl_rows, "output/tables/controls_interactions.csv")

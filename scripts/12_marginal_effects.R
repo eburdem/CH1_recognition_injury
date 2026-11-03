@@ -5,6 +5,7 @@
 #' -------------------
 
 library(emmeans)
+library(readr)
 
 d3   <- readRDS("data/processed/d3_models.rds")
 mods <- readRDS("data/processed/models_h123.rds")
@@ -36,6 +37,8 @@ ggplot(h1, aes(belief_w, credential_w.trend)) +
        caption = "Shaded band: 83.5% CI") +
   theme_minimal()
 
+ggsave("output/figures/h1_marginal_effect.png", width = 6, height = 4, dpi = 300)
+
 #' H2 plot: credential gap across the range of stratification
 s_grid <- seq(min(d3$stratification_c), max(d3$stratification_c), length.out = 20)
 h2 <- as.data.frame(
@@ -50,3 +53,14 @@ ggplot(h2, aes(stratification_c, credential_w.trend)) +
        caption = "Shaded band: 83.5% CI") +
   theme_minimal()
 
+ggsave("output/figures/h2_marginal_effect.png", width = 6, height = 4, dpi = 300)
+
+h1_table <- as.data.frame(
+  emtrends(m_h1, ~ belief_w, var = "credential_w",
+           at = list(belief_w = c(-sd_b, 0, sd_b))))
+write_csv(h1_table, "output/tables/h1_marginal_effects.csv")
+
+h2_table <- as.data.frame(
+  emtrends(m_h2, ~ stratification_c, var = "credential_w",
+           at = list(stratification_c = c(min(d3$stratification_c), 0, max(d3$stratification_c)))))
+write_csv(h2_table, "output/tables/h2_marginal_effects.csv")
