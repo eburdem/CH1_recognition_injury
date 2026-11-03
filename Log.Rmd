@@ -419,4 +419,13 @@ Random-slope variance barely falls with stratification (0.0235 to 0.0226), so th
 **Result**
 H1: gap 0.377 / 0.412 / 0.448 (95% CI 0.296 to 0.528), positive at every belief level. H2: gap 0.348 / 0.413 / 0.514 (95% CI 0.228 to 0.678); the intervals at the extremes overlap.
 
+## 2026-11-03 Country-level controls as a sensitivity run
+**Context**: Added Gini, log GDP per capita and tertiary enrolment to H1, H2 and H3 to check whether omitting them drives the results. These vary by wave (2 values per country), so I used country means, centered on the mean of the 25 country means.
+
+credential_b has a very large SE (about 1.9): its between-country SD is only 0.11 with 25 countries (r = 0.47 with tertiary_c), so it is a power problem, not collinearity.
+
+**Decision**: Will keep the models without controls as the main specification and report this as a robustness run. I won't interpret between-country coefficients; interpret within-country effects and cross-level interactions.
+
+**Result**
+H1 +0.0407 (p = .038), H2 +0.0209 (p = .187), H3 +0.0081 (p = .383): identical to the main models. No control is significant. Random-slope variance unchanged (0.0225 to 0.0234).
 
