@@ -359,3 +359,19 @@ EDUCYRS and the credential are on different scales, so only p-values and signs a
 **Decision**: Will keep the harmonized credential as the main measure. Will report EDUCYRS as a sensitivity analysis.
 
 **Result**: Main credential: H1 p = .013, H2 p = .117, H3 p = .259. Raw years: H1 p = .156, H2 p = .053, H3 p = .887. Cubed years: H1 p = .116, H2 p = .101, H3 p = .885. All signs positive. H1 does not hold with graded years.
+
+## 2026-11-04 Robustness: two-item belief (hard work + ambition), 2009 only
+**Context**: The ambition item (v4) exists only in ISSP 2009, so the check is 2009 only (n = 21,794, 25 countries, no wave term). The two items correlate .43. Belief standardized per SD for both versions so estimates are comparable.
+
+**Decision**: Will keep the one-item hard-work belief as the main measure (both waves); report the two-item result as a 2009 robustness check.
+
+**Result**: One item: H1 +0.057 (p = .015), H3 -0.002 (p = .856). 
+Two items: H1 +0.072 (p = .002), H3 -0.004 (p = .705). 
+H1 is stronger with the two-item belief; H3 stays null.
+
+
+
+
+
+
+
