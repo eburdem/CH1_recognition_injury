@@ -345,4 +345,11 @@ H3: 0.002 to 0.018, p < .05 in 1 of 25 (without the USA, p = .038). No sign reve
 **Result**
 H1 +0.042 to +0.051, p between .006 and .024 in all four specifications. H2 +0.022 to +0.026, p .12 to .17. H3 +0.009 to +0.013, p .12 to .29. Signs and sizes are stable; no hypothesis changes status.
 
+## 2026-11-04 Robustness: weights and adults only (n = 42,714)
+**Context**: Added the ISSP weight (mean 0.99, 99.9th percentile 5.6, maximum 20.3) and restricted to respondents aged 18 and over, recentering credential and belief within country on the adult sample.
+
+**Decision**: Keep the unweighted model as the main specification. Weights enter lmer as precision weights, not survey design weights, so the weighted run is a sensitivity check only.
+
+**Result**: Weighted: H1 +0.050 (p = .009), H2 +0.028 (p = .082), H3 +0.011 (p = .199). Adults only: H1 +0.045 (p = .017), H2 +0.023 (p = .133), H3 +0.010 (p = .239). No hypothesis changes status.
+
 
