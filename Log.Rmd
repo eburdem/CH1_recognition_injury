@@ -352,4 +352,10 @@ H1 +0.042 to +0.051, p between .006 and .024 in all four specifications. H2 +0.0
 
 **Result**: Weighted: H1 +0.050 (p = .009), H2 +0.028 (p = .082), H3 +0.011 (p = .199). Adults only: H1 +0.045 (p = .017), H2 +0.023 (p = .133), H3 +0.010 (p = .239). No hypothesis changes status.
 
+## 2026-11-04 Robustness: EDUCYRS (raw and cubed) on a common sample
+**Context**: Anthony suggested EDUCYRS, possibly non-linear. 1,298 respondents lack EDUCYRS; common sample n = 41,416 (25 countries); main model refit on the same sample.
+EDUCYRS and the credential are on different scales, so only p-values and signs are compared.
 
+**Decision**: Will keep the harmonized credential as the main measure. Will report EDUCYRS as a sensitivity analysis.
+
+**Result**: Main credential: H1 p = .013, H2 p = .117, H3 p = .259. Raw years: H1 p = .156, H2 p = .053, H3 p = .887. Cubed years: H1 p = .116, H2 p = .101, H3 p = .885. All signs positive. H1 does not hold with graded years.
