@@ -337,4 +337,12 @@ H1: estimates 0.034 to 0.057, p < .05 in 22 of 25 (above .05 only without the US
 H2: 0.016 to 0.034, p < .05 in 3 of 25 (without Finland, Czech Republic or Germany). 
 H3: 0.002 to 0.018, p < .05 in 1 of 25 (without the USA, p = .038). No sign reversals.
 
+## 2026-11-04 Robustness of H1, H2 and H3 (n = 42,714)
+**Context**: Refited the three interaction models with (A) a country-wave random intercept added, (B) within country-wave centering of credential and belief, (C) the original DEGREE = 5 credential instead of the harmonized one (same respondents).
+
+**Decision**: Will keep the main specification. Will report A to C as robustness checks, with the country-wave intercept version as the conservative H1 estimate.
+
+**Result**
+H1 +0.042 to +0.051, p between .006 and .024 in all four specifications. H2 +0.022 to +0.026, p .12 to .17. H3 +0.009 to +0.013, p .12 to .29. Signs and sizes are stable; no hypothesis changes status.
+
 
