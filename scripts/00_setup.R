@@ -13,5 +13,6 @@
 #'   install.packages("haven")
 #'   install.packages("tidyr")
 #'   install.packages("emmeans")
+#'   install.packages("table1")
 
 renv::snapshot()
