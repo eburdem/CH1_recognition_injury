@@ -5,8 +5,10 @@
 #' ----------------
 
 library(dplyr)
+library(tidyr)
 library(readr)
 library(ggplot2)
+library(table1)
 
 dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
 d3 <- readRDS("data/processed/d3.rds")
@@ -28,6 +30,17 @@ for (v in c("credential", "income", "gender", "wave")) {
   cat("\n", v, "\n")
   print(round(100 * prop.table(table(d3[[v]])), 1))
 }
+
+#' Table 1: number of observations per country and wave
+table1_obs <- d3 %>%
+  count(country, wave) %>%
+  pivot_wider(names_from = wave, values_from = n, values_fill = 0) %>%
+  mutate(Total = `2009` + `2019`) %>%
+  arrange(country)
+
+table1_obs
+write_csv(table1_obs, "output/tables/table1_obs_per_country_wave.csv")
+
 
 #' Plots
 p_sss <- ggplot(d3, aes(x = sss)) +
@@ -84,5 +97,23 @@ d3 %>% distinct(country, wave, stratification, gini, gdp_pc, tertiary) %>%
 d3 %>% group_by(country) %>%
   summarise(pct_tert = 100 * mean(credential), pct_alt = 100 * mean(credential_alt)) %>%
   arrange(desc(pct_alt - pct_tert)) %>% print(n = 30)
+
+#' table 1: Descriptives
+
+d3$credential_f <- factor(d3$credential, levels = 0:1, labels = c("No tertiary degree", "Tertiary degree"))
+d3$gender_f     <- factor(d3$gender,     levels = 0:1, labels = c("Male", "Female"))
+d3$income_f     <- factor(d3$income,     levels = 1:3, labels = c("Low", "Middle", "High"))
+
+label(d3$sss)          <- "Subjective social status (1-10)"
+label(d3$ind_belief)   <- "Meritocratic belief (1-5)"
+label(d3$isei)         <- "Occupational status (ISEI)"
+label(d3$age)          <- "Age"
+label(d3$credential_f) <- "Credential"
+label(d3$gender_f)     <- "Gender"
+label(d3$income_f)     <- "Household income tercile"
+
+table1(~ sss + ind_belief + isei + age + credential_f + gender_f + income_f | factor(wave),
+       data = d3,
+       render.continuous = c(.= "Mean (SD)", .= "[Min, Max]"))
 
 
