@@ -31,6 +31,7 @@ library(emmeans)
 
 dir.create("output/tables",  recursive = TRUE, showWarnings = FALSE)
 dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
 
 #' ISSP: load, keep three waves, lowercase names once
 issp_raw <- read_dta("data/raw/issp/cumulation/ZA8790_v1-0-0b.dta") %>%
@@ -49,15 +50,15 @@ issp <- issp_raw %>%
     credential = case_when(degree == 5 ~ 1, degree %in% 0:4 ~ 0),   # DEGREE = 5 only; becomes credential_degree5 in script 03
     credential_alt = case_when(degree >= 4 ~ 1, degree %in% 0:3 ~ 0),   # post-secondary or higher
     ind_belief = if_else(v6 %in% 1:5, 6 - v6, NA_real_),            # reverses the hard-work item 5 = strongest endorsement
-    income     = factor(if_else(income %in% 1:3, income, NA_real_)), # tercitale 1-3 as factor other codes NA
-    age        = if_else(age > 0, age, NA_real_), # age must be postive
+    income     = factor(if_else(income %in% 1:3, income, NA_real_)), # household income tercile as a factor (low, middle, high), so the model gets two dummies.
+    age        = if_else(age > 0, age, NA_real_), # age must be positive
     age_sq     = age^2, # for quadratic term
     gender     = case_when(sex == 1 ~ 0, sex == 2 ~ 1),   # 1 = female
     isco88     = isco88 # occupation code, kept for ISEI lookup
   ) %>%
   zap_labels() # removes haven's value labels so columns are plain numbers
 
-#' ISEI Lookup 
+#' ISEI Lookup to turn ISCO*88 occupatıon code into an occupational status score
 x <- readLines("data/raw/macro/iskoisei.sps") #reads it as text lines
 x <- gsub("recode @isko \\(|\\) into @isei\\.", "", x) # strips the recode isco into isei
 isei_lookup <- read.table(text = gsub("=", " ", x), col.names = c("isco88", "isei"))
@@ -89,15 +90,17 @@ setdiff(unique(issp$country), swiid$country)
 
 
 merged <- left_join(issp, country_level, by = c("country", "wave")) # keeps every respondent and attaches country values.
-stopifnot(nrow(merged) == nrow(issp))  # stops the script if the join added or lost rows
+stopifnot(nrow(merged) == nrow(issp))  # a join that finds two matching rows would silently duplicate respondents
 
-stopifnot(!anyDuplicated(merged[c("wave", "iso", "id")]))
+stopifnot(!anyDuplicated(merged[c("wave", "iso", "id")])) #  (wave, country, id) must identify one respondent only
 
 table(issp_raw$degree, issp$credential, useNA = "ifany")
 
 #' ------------------------------
 #' 02_degree_variable_built  (ONE-OFF, switched off)
 #' ------------------------------
+#' The ISSP `DEGREE` variable is not harmonized over time: 
+#' in 2009 it was derived from national categories, and codes differ by country and wave
 #' Builds the BLANK crosswalks that I filled in by hand into degree_crosswalk_final.csv.
 #' Not needed to reproduce the analysis. Set to TRUE only to regenerate the blank files.
 rebuild_blank_crosswalk <- FALSE
@@ -111,9 +114,9 @@ names(w19) <- tolower(names(w19))
 if (rebuild_blank_crosswalk) {
   
   tab_one <- function(d, iso, wave) {
-    nat  <- paste0(tolower(iso), "_degr")                 # builds the national variable name
-    sub  <- d[startsWith(as.character(d$c_alphan), iso), ]  # selects the country
-    labs <- attr(d[[nat]], "labels")                      # value labels of the national variable
+    nat  <- paste0(tolower(iso), "_degr")  # builds the national variable name
+    sub  <- d[startsWith(as.character(d$c_alphan), iso), ] # selects the country
+    labs <- attr(d[[nat]], "labels")      # value labels of the national variable
     sub %>%
       transmute(nat_code        = as.numeric(.data[[nat]]),
                 degree_original = as.numeric(degree),
@@ -162,14 +165,14 @@ isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI",
 isos_2019 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","AU","DE","JP","NZ","US")
 
 #' Respondent table: id is v3 in 2009 and caseid in 2019
-resp_one <- function(d, iso, wave, idvar) {
+resp_one <- function(d, iso, wave, idvar) { # builds a respondent table from the wave files
   nat <- paste0(tolower(iso), "_degr")
   d[startsWith(as.character(d$c_alphan), iso), ] %>%
     transmute(wave = wave, iso = iso, id = as.numeric(.data[[idvar]]),
               nat_code = as.numeric(.data[[nat]]),
               degree_original = as.numeric(degree))
 }
-resp <- bind_rows(
+resp <- bind_rows( # results stacked with this
   lapply(isos_2009, function(i) resp_one(w09, i, 2009, "v3")),
   lapply(isos_2019, function(i) resp_one(w19, i, 2019, "caseid"))
 )
@@ -189,7 +192,7 @@ stopifnot(!anyDuplicated(resp[c("wave", "iso", "id")]))
 #' Attach to the merged data (many-to-one on wave, iso, id) and rename
 harm <- resp %>% select(wave, iso, id, harmonized_tertiary)
 analysis <- merged %>%
-  left_join(harm, by = c("wave", "iso", "id"), relationship = "many-to-one")
+  left_join(harm, by = c("wave", "iso", "id"), relationship = "many-to-one") 
 
 stopifnot(nrow(analysis) == nrow(merged))
 stopifnot(sum(!is.na(analysis$harmonized_tertiary)) == sum(!is.na(harm$harmonized_tertiary)))
@@ -200,20 +203,18 @@ analysis <- analysis %>%
 sum(!is.na(analysis$credential))     # should be a large number (about 6,646 of 6,732 for the five 2009 countries alone)
 table(analysis$wave[analysis$wave %in% c(2009, 2019)], is.na(analysis$credential[analysis$wave %in% c(2009, 2019)]))
 
-#' ------------------------------
-#' CHAPTER 1 - RECOGNITION INJURY 
-#' ------------------------------
+#' ---------
 #' 04_checks
 #' ---------
 
 merged <- analysis
 
 #' Old vs new recodes
-table(issp_raw$v6,     merged$ind_belief, useNA = "ifany")
+table(issp_raw$v6, merged$ind_belief, useNA = "ifany")
 table(issp_raw$degree, merged$credential, useNA = "ifany")
 table(issp_raw$degree, merged$credential_degree5, useNA = "ifany")
-table(issp_raw$income, merged$income,     useNA = "ifany")
-table(issp_raw$sex,    merged$gender,     useNA = "ifany")
+table(issp_raw$income, merged$income, useNA = "ifany")
+table(issp_raw$sex, merged$gender, useNA = "ifany")
 summary(issp_raw$age) 
 summary(merged$age)
 summary(merged$age_sq)
@@ -367,7 +368,6 @@ table1_obs <- d3 %>%
 table1_obs
 write_csv(table1_obs, "output/tables/table1_obs_per_country_wave.csv")
 
-
 #' Group Descriptives
 
 #' Raw credential gap
@@ -513,6 +513,8 @@ d3 %>% group_by(country) %>%
 
 # WITHIN version (current): credential_w * belief_w + credential_b + belief_b
 # RAW version (Anthony):    credential   * ind_belief + credential_b + belief_b
+
+saveRDS(d3, "data/processed/d3_models.rds")
 
 #' -------------
 #' 09_null_model
@@ -1197,6 +1199,12 @@ s2 <- summary(m_h2_wave)$coefficients
 s1[grepl("credential_w:belief_w:factor\\(wave\\)", rownames(s1)), , drop = FALSE]
 s2[grepl("credential_w:stratification_c:factor\\(wave\\)", rownames(s2)), , drop = FALSE]
 
+wave_test <- rbind(
+  H1 = s1[grepl("credential_w:belief_w:factor\\(wave\\)", rownames(s1)), ],
+  H2 = s2[grepl("credential_w:stratification_c:factor\\(wave\\)", rownames(s2)), ])
+wave_test
+write.csv(wave_test, "output/tables/wave_difference_test.csv")
+
 #' Marginal effects at the 25th and 75th percentile country (needs cm_strat, tab_level, b_lim from part 14)
 lo25 <- quantile(cm_strat$stratification_c, 0.25)
 hi75 <- quantile(cm_strat$stratification_c, 0.75)
@@ -1240,4 +1248,10 @@ par(mfrow = c(1, 3))
 for (v in names(re)[1:3]) { qqnorm(re[[v]], main = v); qqline(re[[v]], col = "red") }
 dev.off()
 
+write.csv(round(cor(cl[, -1]), 2), "output/tables/country_level_correlations.csv")
+write.csv(data.frame(variable = names(vif_manual), vif = round(vif_manual, 2)),
+          "output/tables/country_level_vif.csv", row.names = FALSE)
+write.csv(data.frame(model = c("H1", "H2", "H3"),
+                     singular = c(isSingular(m_h1_ctrl), isSingular(m_h2_ctrl), isSingular(m_h3_ctrl))),
+          "output/tables/singular_fit_check.csv", row.names = FALSE)
 
