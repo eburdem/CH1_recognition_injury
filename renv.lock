@@ -9,6 +9,32 @@
     ]
   },
   "Packages": {
+    "Formula": {
+      "Package": "Formula",
+      "Version": "1.2-6",
+      "Source": "Repository",
+      "Date": "2026-08-01",
+      "Title": "Extended Model Formulas",
+      "Description": "Infrastructure for extended formulas with multiple parts on the right-hand side and/or multiple responses on the left-hand side (see <doi:10.18637/jss.v034.i01>).",
+      "Authors@R": "c(person(given = \"Achim\", family = \"Zeileis\", role = c(\"aut\", \"cre\"), email = \"Achim.Zeileis@R-project.org\", comment = c(ORCID = \"0000-0003-0918-3766\")), person(given = \"Yves\", family = \"Croissant\", role = \"aut\", email = \"Yves.Croissant@univ-reunion.fr\", comment = c(ORCID = \"0000-0002-4857-7736\")))",
+      "Depends": [
+        "R (>= 2.0.0)",
+        "stats"
+      ],
+      "Suggests": [
+        "knitr",
+        "rmarkdown"
+      ],
+      "License": "GPL-2 | GPL-3",
+      "VignetteBuilder": "knitr",
+      "URL": "https://zeileis.codeberg.page/Formula/",
+      "BugReports": "https://codeberg.org/zeileis/Formula/issues",
+      "NeedsCompilation": "no",
+      "Author": "Achim Zeileis [aut, cre] (ORCID: <https://orcid.org/0000-0003-0918-3766>), Yves Croissant [aut] (ORCID: <https://orcid.org/0000-0002-4857-7736>)",
+      "Maintainer": "Achim Zeileis <Achim.Zeileis@R-project.org>",
+      "Repository": "CRAN",
+      "Encoding": "UTF-8"
+    },
     "MASS": {
       "Package": "MASS",
       "Version": "7.3-61",
@@ -2606,6 +2632,49 @@
       "NeedsCompilation": "no",
       "Author": "Hadley Wickham [aut, cre, cph], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
+      "Repository": "CRAN"
+    },
+    "table1": {
+      "Package": "table1",
+      "Version": "1.5.1",
+      "Source": "Repository",
+      "Type": "Package",
+      "Date": "2025-09-19",
+      "Title": "Tables of Descriptive Statistics in HTML",
+      "Authors@R": "person(\"Benjamin\", \"Rich\", role=c(\"aut\", \"cre\", \"cph\"), email=\"mail@benjaminrich.net\")",
+      "Author": "Benjamin Rich [aut, cre, cph]",
+      "Maintainer": "Benjamin Rich <mail@benjaminrich.net>",
+      "URL": "https://github.com/benjaminrich/table1",
+      "BugReports": "https://github.com/benjaminrich/table1/issues",
+      "Description": "Create HTML tables of descriptive statistics, as one would expect to see as the first table (i.e. \"Table 1\") in a medical/epidemiological journal article.",
+      "License": "GPL-3",
+      "Depends": [
+        "R (>= 3.5.0)"
+      ],
+      "Imports": [
+        "stats",
+        "Formula",
+        "knitr",
+        "htmltools",
+        "yaml",
+        "methods"
+      ],
+      "Suggests": [
+        "boot",
+        "MatchIt",
+        "rmarkdown",
+        "printr",
+        "kableExtra",
+        "flextable",
+        "officer",
+        "Hmisc",
+        "survey"
+      ],
+      "VignetteBuilder": "knitr",
+      "Language": "en-US",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.3",
+      "NeedsCompilation": "no",
       "Repository": "CRAN"
     },
     "tibble": {
