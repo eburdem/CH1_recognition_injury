@@ -872,6 +872,90 @@ saveRDS(list(m_h1_ctrl = m_h1_ctrl, m_h2_ctrl = m_h2_ctrl, m_h3_ctrl = m_h3_ctrl
              m_h1_ctrl_raw = m_h1_ctrl_raw, m_h2_ctrl_raw = m_h2_ctrl_raw, m_h3_ctrl_raw = m_h3_ctrl_raw),
         "data/processed/models_ctrl.rds")
 
+#' ------------------------------
+#' 14_b_estimates_with_intervals
+#' ------------------------------
+
+#' Smallest effect of interest: a change of this many SSS points in the credential gap between a
+#' low and a high value of the moderator. My choice (0.10 = about 23% of the net gap, 0.06 SD of SSS).
+sesoi <- 0.10
+
+#' How far apart are the two moderator values that define each contrast?
+w_h1 <- 2 * sd_b     # belief: -1 SD to +1 SD within country
+w_h2 <- as.numeric(hi - lo)    # stratification: 10th to 90th percentile country (about 6.5 units)
+w_h3 <- w_h1 * w_h2    # change in the belief contrast between those two countries
+
+#' One row per hypothesis: per-unit coefficient and the contrast, each with intervals
+est_row <- function(m, term, label, width, what) {
+  s    <- summary(m)$coefficients[term, ]
+  est  <- s[["Estimate"]]; se <- s[["Std. Error"]]; df <- s[["df"]]
+  df_c <- lme4::ngrps(m)[["country"]] - 1                       # conservative df: countries - 1
+  ci   <- function(level, d) est + c(-1, 1) * qt(1 - (1 - level) / 2, d) * se
+  c95  <- ci(0.95, df); c90 <- ci(0.90, df); cc95 <- ci(0.95, df_c)
+  data.frame(hypothesis = label, contrast = what,
+             est_per_unit = est, se_per_unit = se, df = df,
+             lo95_per_unit = c95[1], hi95_per_unit = c95[2],
+             contrast_est = est * width, contrast_se = se * width,
+             lo95 = c95[1] * width, hi95 = c95[2] * width,
+             lo90 = c90[1] * width, hi90 = c90[2] * width,
+             lo95_cons = cc95[1] * width, hi95_cons = cc95[2] * width,
+             row.names = NULL)
+}
+
+est_tab <- bind_rows(
+  est_row(m_h1_ctrl, "credential_w:belief_w", "H1", w_h1,
+          "credential gap at +1 SD minus -1 SD of belief"),
+  est_row(m_h2_ctrl, "credential_w:stratification_c", "H2", w_h2,
+          "credential gap in 90th minus 10th percentile stratification country"),
+  est_row(m_h3_ctrl, "credential_w:belief_w:stratification_c", "H3", w_h3,
+          "H1 contrast in 90th minus 10th percentile stratification country"))
+
+#' the contrasts on scales
+net_gap <- fixef(m_h2_ctrl)[["credential_w"]]   # average credential gap in SSS points, net of the controls
+sd_sss  <- sd(d3$sss)
+
+est_tab <- est_tab %>%
+  mutate(pct_of_gap    = 100 * contrast_est / net_gap,  # contrast as a share of the net credential gap
+         sd_sss_units  = contrast_est / sd_sss, # contrast in SDs of SSS
+         verdict = case_when(
+           lo90 > sesoi                  ~ "larger than SESOI",
+           hi90 < -sesoi                 ~ "more negative than -SESOI",
+           lo90 > -sesoi & hi90 < sesoi  ~ "equivalent to zero (inside +-SESOI)",
+           lo95 > 0 | hi95 < 0           ~ "not zero, size uncertain",
+           TRUE                          ~ "inconclusive (interval includes zero and SESOI)"))
+
+#' Net credential gap (average country) in SSS points and SDs, and the SESOI as a share of it
+data.frame(net_gap = round(net_gap, 3), net_gap_in_sd = round(net_gap / sd_sss, 2),
+           sesoi = sesoi, sesoi_pct_of_gap = round(100 * sesoi / net_gap))
+
+est_tab_print <- est_tab %>%
+  transmute(hypothesis,
+            per_unit              = sprintf("%+.3f [%+.3f, %+.3f]", est_per_unit, lo95_per_unit, hi95_per_unit),
+            contrast              = sprintf("%+.3f [%+.3f, %+.3f]", contrast_est, lo95, hi95),
+            contrast_conservative = sprintf("[%+.3f, %+.3f]", lo95_cons, hi95_cons),
+            pct_of_gap            = round(pct_of_gap),
+            sd_sss_units          = round(sd_sss_units, 2),
+            verdict)
+as.data.frame(est_tab_print)
+write.csv(est_tab, "output/tables/estimates_with_intervals.csv", row.names = FALSE)
+
+#' Figure 4: the three contrasts with 95% (thin) and 90% (thick) intervals and the SESOI band
+p_est <- ggplot(est_tab, aes(x = factor(hypothesis, levels = c("H3", "H2", "H1")), y = contrast_est)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -sesoi, ymax = sesoi, alpha = 0.12) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_linerange(aes(ymin = lo95, ymax = hi95)) +
+  geom_linerange(aes(ymin = lo90, ymax = hi90), linewidth = 1.6) +
+  geom_point(size = 2.5) +
+  coord_flip(ylim = range(c(-sesoi, sesoi, est_tab$lo95, est_tab$hi95)) + c(-0.05, 0.05)) +   # keeps both band edges visible
+  labs(x = NULL, y = "Change in the credential gap (SSS points)",
+       caption = paste0("Thin line: 95% CI. Thick line: 90% CI. Shaded band: +-", sesoi,
+                        " (smallest effect of interest).\n",
+                        "H1: +1 SD vs -1 SD of belief. H2: 90th vs 10th percentile stratification country. ",
+                        "H3: H1 contrast, high vs low stratification.")) +
+  theme_minimal()
+p_est
+ggsave("output/figures/fig4_estimates_vs_sesoi.png", p_est, width = 7.5, height = 3.2, dpi = 300)
+
 
 #' ------------------------------
 #' 15_stepwise_regression_table
