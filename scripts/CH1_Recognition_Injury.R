@@ -78,11 +78,17 @@ swiid <- read_csv("data/raw/macro/swiid/swiid9_92_summary.csv", show_col_types =
   mutate(country = recode(country, !!!name_fix)) %>%
   select(country, wave = year, gini = gini_disp) # SWIID Gini by country per year
 
-#' tertiary is NA for six country-waves in 2009 (Australia, Germany, Japan, NZ, Portugal, USA);
+#' tertiary is NA for five country-waves in 2009 (Australia, Germany, Japan, NZ, USA);
 #' kept as NA by decision
 country_level <- strat %>%
   left_join(wdi,   by = "country") %>%
   left_join(swiid, by = c("country", "wave")) #joins the three on country and wave for Gini. Stratification repeats across waves because it does not change.
+
+#' Portugal 2009: WDI has no tertiary value for 2000-2014. Imputed by linear interpolation
+#' between UNESCO UIS 2007 (56.9) and WDI 2015 (61.8). Sensitivity: +-5, and a refit without tertiary.
+country_level <- country_level %>%
+  mutate(tertiary = if_else(country == "Portugal" & wave == 2009 & is.na(tertiary), 58.1, tertiary))
+
 #' guard checks
 setdiff(unique(issp$country), strat$country)  #  lists ISSP countries missing from each country-level file.
 setdiff(unique(issp$country), wdi$country)    
@@ -156,12 +162,17 @@ if (rebuild_blank_crosswalk) {
 #' 03_degree_variable_harmonized
 #' ------------------------------
 #' Uses the hand-filled crosswalk (1 = completed bachelor-level or higher, 0 = otherwise)
-stopifnot(file.exists("data/docs/degree_crosswalk_final.csv"))
-cw <- read_csv("data/docs/degree_crosswalk_final.csv", show_col_types = FALSE)
+crosswalk_file <- "data/docs/degree_crosswalk_portugalfinal26nov.csv"
+stopifnot(file.exists(crosswalk_file))
+cw <- read_csv(crosswalk_file, show_col_types = FALSE)
+
+#' Portugal rows must be there: expect 11 rows, 1000 respondents, 145 tertiary (127 if you set code 8 to 0)
+cw %>% filter(iso == "PT") %>%
+  summarise(rows = n(), respondents = sum(n), tertiary = sum(n[harmonized_tertiary == 1]))
 
 #' Country codes covered in each wave (same as in the crosswalk)
 isos_2009 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","HU","LV","PL","SK","ES",
-               "AU","DE","JP","NZ","US")
+               "AU","DE","JP","NZ","US","PT")
 isos_2019 <- c("AT","CL","CZ","DK","FI","FR","GB","IS","IL","IT","LT","NO","SI","SE","CH","AU","DE","JP","NZ","US")
 
 #' Respondent table: id is v3 in 2009 and caseid in 2019
@@ -200,7 +211,7 @@ stopifnot(sum(!is.na(analysis$harmonized_tertiary)) == sum(!is.na(harm$harmonize
 analysis <- analysis %>%
   rename(credential_degree5 = credential, credential = harmonized_tertiary)
 
-sum(!is.na(analysis$credential))     # should be a large number (about 6,646 of 6,732 for the five 2009 countries alone)
+sum(!is.na(analysis$credential))     # 60,273 non-missing
 table(analysis$wave[analysis$wave %in% c(2009, 2019)], is.na(analysis$credential[analysis$wave %in% c(2009, 2019)]))
 
 #' ---------
@@ -289,9 +300,9 @@ nrow(d2) # H2 needs the OECD stratification value, so countries without one (Bul
 n_distinct(d2$country)  
 d3 <- d2 %>% drop_na(all_of(model_vars)) # keeping only respondents with no missing value on any model variable
 #' d3 is the analytic sample.
-nrow(d3)               # 42714
-n_distinct(d3$country) # 25
-setdiff(unique(d2$country), unique(d3$country))   # should be "Portugal" because it has no crosswalk entry and so no credential.
+nrow(d3)               # 43211
+n_distinct(d3$country) # 26
+setdiff(unique(d2$country), unique(d3$country))   # character(0): every country in d2 keeps respondents in d3
 
 #' Attrition table
 attrition <- data.frame(
@@ -718,15 +729,15 @@ m_h3_ctrl <- lmer(sss ~ credential_w * belief_w * stratification_c + credential_
                     (1 + credential_w + belief_w | country), data = d3)
 
 #' Check: these must match the cred_bel versions from the comparison
-summary(m_h1_ctrl)$coefficients["credential_w:belief_w", ]       # estimate about 0.0443, p about 0.018
-summary(m_h3_ctrl)$coefficients["credential_w:belief_w:stratification_c", ]   # estimate about 0.0091, p about 0.28
+summary(m_h1_ctrl)$coefficients["credential_w:belief_w", ]       # estimate about 0.0455, p about 0.0155
+summary(m_h3_ctrl)$coefficients["credential_w:belief_w:stratification_c", ]   # estimate about 0.0090, p about 0.286
 isSingular(m_h1_ctrl)
 isSingular(m_h3_ctrl)
 
 #' Compare: fit, singular fit, and the key interaction in each version
 slope_summary <- function(rs, term) {
   data.frame(random_part = names(rs),
-             singular    = sapply(rs, isSingular), # version asks for more than 25 countries can support
+             singular    = sapply(rs, isSingular), # TRUE = the random part asks for more than 26 countries can support
              AIC         = sapply(rs, AIC), # BIC penalizes the extra parameters more, so it favours the simpler model sooner.
              BIC         = sapply(rs, BIC),
              estimate    = sapply(rs, function(m) summary(m)$coefficients[term, "Estimate"]),
@@ -996,8 +1007,12 @@ rob_row <- function(label, m1, m2, m3, cr = "credential_w", be = "belief_w") {
   a  <- pick(m1, paste0(cr, ":", be))
   b  <- pick(m2, paste0(cr, ":stratification_c"))
   c3 <- pick(m3, paste0(cr, ":", be, ":stratification_c"))
+  ms   <- list(m1, m2, m3)
+  sing <- sapply(ms, isSingular)
+  conv <- sapply(ms, function(m) length(m@optinfo$conv$lme4$messages) > 0)
   data.frame(check = label, n = nobs(m1),
              h1_est = a[1], h1_p = a[2], h2_est = b[1], h2_p = b[2], h3_est = c3[1], h3_p = c3[2],
+             singular = paste(which(sing), collapse = ","), conv_msg = paste(which(conv), collapse = ","),
              row.names = NULL)
 }
 
@@ -1038,9 +1053,10 @@ recenter <- function(d) {
 
 #' p-values with df = number of countries - 1
 conservative_p <- function(m, term) {
-  s <- summary(m)$coefficients
-  t <- s[term, "t value"]
-  c(estimate = s[term, "Estimate"], p_df24 = 2 * pt(-abs(t), df = 24))
+  s  <- summary(m)$coefficients
+  t  <- s[term, "t value"]
+  df <- lme4::ngrps(m)[["country"]] - 1
+  c(estimate = s[term, "Estimate"], p_cons = 2 * pt(-abs(t), df = df), df = df)
 }
 
 #' H1 and H3 only (two-item belief models have no H2 row)
@@ -1130,15 +1146,16 @@ rob_wave <- bind_rows(lapply(sort(unique(d3$wave)), function(wv) {
           update(m_h3_ctrl, . ~ . - factor(wave), data = dw))
 }))
 
-#' conservative p-values (df = 24), computed from the main models
+#' conservative p-values (df = number of countries - 1), computed from the main models
 cons <- rbind(H1 = conservative_p(m_h1_ctrl, "credential_w:belief_w"),
               H2 = conservative_p(m_h2_ctrl, "credential_w:stratification_c"),
               H3 = conservative_p(m_h3_ctrl, "credential_w:belief_w:stratification_c"))
-rob_cons <- data.frame(check = "Conservative df (24)", n = nobs(m_h1_ctrl),
-                       h1_est = cons["H1", "estimate"], h1_p = cons["H1", "p_df24"],
-                       h2_est = cons["H2", "estimate"], h2_p = cons["H2", "p_df24"],
-                       h3_est = cons["H3", "estimate"], h3_p = cons["H3", "p_df24"])
 
+rob_cons <- data.frame(check  = paste0("Conservative df (", cons["H1", "df"], ")"),
+                       n      = nobs(m_h1_ctrl),
+                       h1_est = cons["H1", "estimate"], h1_p = cons["H1", "p_cons"],
+                       h2_est = cons["H2", "estimate"], h2_p = cons["H2", "p_cons"],
+                       h3_est = cons["H3", "estimate"], h3_p = cons["H3", "p_cons"])
 rob <- bind_rows(
   rob_data("Main models", d3),
   #' samples
@@ -1152,9 +1169,9 @@ rob <- bind_rows(
           update(m_h2_ctrl, . ~ . - income - isei_w - isei_b),
           update(m_h3_ctrl, . ~ . - income - isei_w - isei_b)),
   rob_row("Country-wave random intercept",
-          update(m_h1_ctrl, . ~ . + (1 | country:wave)),
-          update(m_h2_ctrl, . ~ . + (1 | country:wave)),
-          update(m_h3_ctrl, . ~ . + (1 | country:wave))),
+          update(m_h1_ctrl, . ~ . + (1 | country:wave), control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))),
+          update(m_h2_ctrl, . ~ . + (1 | country:wave), control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))),
+          update(m_h3_ctrl, . ~ . + (1 | country:wave), control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))),
   #' centering
   rob_swap("Country-wave centering", d3,
            c(credential_w = "credential_w_cw", belief_w = "belief_w_cw"),
